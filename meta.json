@@ -1,0 +1,14 @@
+{
+  "bpId": "long-task-flow",
+  "copiedAt": "2026-05-12T01:00:00.000Z",
+  "skills": [
+    { "originalRef": "claude:bp-long-task-flow/scan",     "newRef": "claude:bp-long-task-flow/scan",     "tool": "claude", "name": "scan",     "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 0 },
+    { "originalRef": "claude:bp-long-task-flow/req",      "newRef": "claude:bp-long-task-flow/req",      "tool": "claude", "name": "req",      "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 0 },
+    { "originalRef": "claude:bp-long-task-flow/design",   "newRef": "claude:bp-long-task-flow/design",   "tool": "claude", "name": "design",   "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 0 },
+    { "originalRef": "claude:bp-long-task-flow/init",     "newRef": "claude:bp-long-task-flow/init",     "tool": "claude", "name": "init",     "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 1 },
+    { "originalRef": "claude:bp-long-task-flow/wd",       "newRef": "claude:bp-long-task-flow/wd",       "tool": "claude", "name": "wd",       "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 0, "containerLoop": "iter" },
+    { "originalRef": "claude:bp-long-task-flow/red",      "newRef": "claude:bp-long-task-flow/red",      "tool": "claude", "name": "red",      "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 0, "containerLoop": "iter" },
+    { "originalRef": "claude:bp-long-task-flow/green",    "newRef": "claude:bp-long-task-flow/green",    "tool": "claude", "name": "green",    "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 0, "containerLoop": "iter" },
+    { "originalRef": "claude:bp-long-task-flow/refactor", "newRef": "claude:bp-long-task-flow/refactor", "tool": "claude", "name": "refactor", "source": "harness-blueprint-adapter", "schemaPlaceholdersRendered": 0, "containerLoop": "iter" }
+  ]
+}

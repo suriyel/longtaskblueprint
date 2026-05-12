@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 3,
+  "id": "long-task-flow",
+  "version": "1.0.0",
+  "title": "Long-Task 主管线 (harness-blueprint-adapter 转化版)",
+  "description": "由 D:\\03PyDemo\\longtaskforagent 主链 (codebase-scanner / requirements / design / init / work-design+feature-design / tdd-red / tdd-green / tdd-refactor) 通过 harness-blueprint-adapter 转化产出。schemaVersion=3，含 SRS 与 Design 双硬门、loop 体内 R/G/R 三节点 + gate_static 硬门，所有产物落 .harness/memory/。",
+  "startNode": "scan",
+  "tasksSchemas": {
+    "default": {
+      "requiredFields": {
+        "id": { "type": ["string", "number"] },
+        "status": { "type": "string", "default": "failing" }
+      },
+      "recommendedFields": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "dependencies": { "type": "array" }
+      },
+      "userFields": {
+        "category": { "type": "string" },
+        "srs_trace": { "type": "array" },
+        "verification_steps": { "type": "array" },
+        "tech_stack": { "type": "object" },
+        "constraints": { "type": "array" },
+        "assumptions": { "type": "array" },
+        "single_round": { "type": "boolean" }
+      },
+      "extensionFieldsAllowed": true,
+      "doneValues": ["passing"],
+      "example": {
+        "id": 1,
+        "title": "登录表单组件",
+        "status": "failing",
+        "priority": "high",
+        "category": "core",
+        "description": "邮箱 + 密码字段、必填校验、submit 触发回调",
+        "srs_trace": ["FR-001", "FR-003"],
+        "verification_steps": ["页面渲染表单", "空提交报错", "成功 submit 调回调"]
+      }
+    }
+  },
+  "nodes": [
+    { "id": "scan",          "kind": "skill",  "title": "代码库约定扫描",       "x": 100, "y": 100 },
+    { "id": "req",           "kind": "skill",  "title": "需求打磨 → SRS",        "x": 300, "y": 100 },
+    {
+      "id": "gate_srs", "kind": "script", "title": "SRS 硬门", "x": 500, "y": 100,
+      "script": { "path": "scripts/gate_srs.cjs", "timeoutMs": 15000 },
+      "onFail": { "rewindTo": "req", "ticketTitle": "SRS 不达标", "maxAttempts": 3 }
+    },
+    { "id": "design",        "kind": "skill",  "title": "设计文档",             "x": 700, "y": 100 },
+    {
+      "id": "gate_design", "kind": "script", "title": "Design 硬门", "x": 900, "y": 100,
+      "script": { "path": "scripts/gate_design.cjs", "timeoutMs": 15000 },
+      "onFail": { "rewindTo": "design", "ticketTitle": "Design 不达标", "maxAttempts": 3 }
+    },
+    { "id": "init",          "kind": "skill",  "title": "初始化 + 灌入 iter",   "x": 1100, "y": 100 },
+    {
+      "id": "iter", "kind": "loop", "title": "按 feature 迭代 R/G/R", "x": 1300, "y": 100,
+      "iterator": { "kind": "tasks", "tasksSchemaRef": "default", "selectStrategy": "first-pending" },
+      "body": {
+        "startNode": "wd",
+        "nodes": [
+          { "id": "wd",       "kind": "skill", "title": "Feature Design",  "x": 100, "y": 100 },
+          { "id": "red",      "kind": "skill", "title": "TDD Red",         "x": 300, "y": 100 },
+          {
+            "id": "green",    "kind": "skill", "title": "TDD Green",       "x": 500, "y": 100,
+            "onFail": { "rewindTo": "red", "ticketTitle": "Green 失败 — 重审 Red 测试", "maxAttempts": 2 }
+          },
+          {
+            "id": "refactor", "kind": "skill", "title": "TDD Refactor",    "x": 700, "y": 100,
+            "onFail": { "rewindTo": "green", "ticketTitle": "Refactor 引入回归", "maxAttempts": 2 }
+          },
+          {
+            "id": "gate_static", "kind": "script", "title": "静态门禁 (lint+test)", "x": 900, "y": 100,
+            "script": { "path": "scripts/gate_static.cjs", "timeoutMs": 120000 },
+            "onFail": { "rewindTo": "refactor", "ticketTitle": "静态检查未通过", "maxAttempts": 3 }
+          }
+        ],
+        "edges": [
+          { "from": "wd",       "to": "red",         "when": "status == \"ok\"" },
+          { "from": "red",      "to": "green",       "when": "status == \"ok\"" },
+          { "from": "green",    "to": "refactor",    "when": "status == \"ok\"" },
+          { "from": "refactor", "to": "gate_static", "when": "status == \"ok\"" }
+        ]
+      },
+      "maxIterations": 50
+    }
+  ],
+  "edges": [
+    { "from": "scan",        "to": "req",         "when": "status == \"ok\"" },
+    { "from": "req",         "to": "gate_srs",    "when": "status == \"ok\"" },
+    { "from": "gate_srs",    "to": "design" },
+    { "from": "design",      "to": "gate_design", "when": "status == \"ok\"" },
+    { "from": "gate_design", "to": "init" },
+    { "from": "init",        "to": "iter",        "when": "status == \"ok\"" }
+  ]
+}

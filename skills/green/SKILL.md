@@ -1,0 +1,49 @@
+---
+name: green
+description: "TDD Green 阶段 -- 编写最小实现使所有测试通过。"
+---
+
+# TDD Green -- 最小实现
+
+编写最小代码使所有测试通过。请自行读取所有文档。
+
+## 获取当前任务
+
+```bash
+{{TASK_GET}}
+```
+
+输出 JSON，解析 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，不要再自行锁定 / 改写 iter-tasks.json 的 current 字段。
+
+## 你的任务
+
+1. 读取执行规则：`reference/tdd-green-execution.md`
+2. 读取规则：`{{REFERENCE}}/iron-law.md`，`{{HARNESS_MEMORY_DIR}}/notes/rules/`
+
+## 实现约束（唯一权威源 = feature 设计文档）
+
+**单次 Read 整份功能设计文档**（路径：`{{HARNESS_MEMORY_DIR}}/notes/feature-<id>-design.md`，`<id>` 取自 `{{TASK_GET}}` 的 `task.id`）。按顺序定位：
+
+1. §接口契约 -- 方法签名、前/后置条件、§11.1 库注释（"Uses: ..."）
+2. §现有代码复用 -- 所有带动作标记的项（REUSE/EXTEND/PATTERN）、§11 库&复用映射
+3. §实现摘要 -- **严格遵从**：按指定文件/类/方法实现，遵循变更描述和设计决策
+4. §全局约束摘录 -- §11.1 强制库 / §11.5 命名 / §11.6 错误处理模式 是实现硬约束
+
+**禁令**：
+- 禁止 Glob / Read / Grep `{{HARNESS_MEMORY_DIR}}/plans/srs.md` 或 `{{HARNESS_MEMORY_DIR}}/plans/design.md`
+- 所有 Design §11 约束已由 wd 节点沉淀到 feature.md §全局约束摘录；缺失 → 返 BLOCKED，不自行回访上游
+
+## 关键约束
+
+- 从测试出发进行全新实现 -- 绝不引用预删除的代码
+- 一次一个测试：从最简单的失败测试开始
+- 不做过早优化或额外功能
+- §11.1：使用 feature.md §全局约束摘录 §11.1 表中的强制内部库，不使用被替代的方案
+- §11.5：遵循 feature.md §全局约束摘录 §11.5 命名约定
+- §11.6：遵循 feature.md §全局约束摘录 §11.6 错误处理模式
+- REUSE 项：直接导入并调用 -- 不要重新实现
+- EXTEND 项：继承或扩展 -- 不要复制粘贴
+- PATTERN 项：遵循相同的结构模式
+- 所有测试必须通过，零回归
+- 测试输出协议：先静默运行 → 如果 PASS 完成；如果 FAIL → 详细输出查看错误
+
