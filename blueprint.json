@@ -56,7 +56,12 @@
     },
     { "id": "init",          "kind": "skill",  "title": "初始化 + 灌入 iter",   "x": 1100, "y": 100 },
     {
-      "id": "iter", "kind": "loop", "title": "按 feature 迭代 R/G/R", "x": 1300, "y": 100,
+      "id": "gate_init", "kind": "script", "title": "Init 硬门", "x": 1300, "y": 100,
+      "script": { "path": "scripts/gate_init.cjs", "timeoutMs": 15000 },
+      "onFail": { "rewindTo": "init", "ticketTitle": "Init 产物不达标", "maxAttempts": 3 }
+    },
+    {
+      "id": "iter", "kind": "loop", "title": "按 feature 迭代 R/G/R", "x": 1500, "y": 100,
       "iterator": { "kind": "tasks", "tasksSchemaRef": "default", "selectStrategy": "first-pending" },
       "body": {
         "startNode": "wd",
@@ -93,6 +98,7 @@
     { "from": "gate_srs",    "to": "design" },
     { "from": "design",      "to": "gate_design", "when": "status == \"ok\"" },
     { "from": "gate_design", "to": "init" },
-    { "from": "init",        "to": "iter",        "when": "status == \"ok\"" }
+    { "from": "init",        "to": "gate_init",   "when": "status == \"ok\"" },
+    { "from": "gate_init",   "to": "iter" }
   ]
 }
