@@ -261,6 +261,7 @@
           "FR-001",
           "FR-003"
         ],
+        "dependencies": [],
         "verification_steps": [
           "页面渲染表单",
           "空提交报错",
