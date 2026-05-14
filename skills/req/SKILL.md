@@ -103,15 +103,20 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
 1. 从用户描述提取领域关键词（如"认证"/"支付"/"数据管道"），推导 `--focus` 维度。
 2. 推断 `--path`（若用户提及具体目录）。
 3. 深度默认省略（让 explore 按 LOC 自检）；用户输入明显窄范围可降。
-4. DISPATCH：
+4. 直接执行代码库探索（不 spawn SubAgent）：
 
-   > **DISPATCH** 创建独立 SubAgent（使用 General 或 Agent）— 在 subagent 中加载并执行 skill `long-task:long-task-explore`
-   > Depth: {省略或推导}
-   > Focus: {推导的维度}
-   > Path: {推导的路径或 "."}
-   > User question: "{用户描述摘要}"
-   >
-   > 备注：若该 sub-skill 在当前 plugin 集合中未安装，subagent 应直接用 Glob / Grep / Read 工具按 focus 维度做等价探索（不阻塞主流程）；并行参考上游 scan 节点产出 `{{HARNESS_MEMORY_DIR}}/plans/codebase-scan.md`（若存在）作为 baseline。
+   加载并执行技能 explore-guide，按其流程顺序执行全部探索阶段（Phase 1 结构扫描 → [按深度决定是否进入 Phase 2 维度分析] → 综合 → 输出）。
+
+   参数：
+   - Depth: {省略或推导}
+   - Focus: {推导的维度}
+   - Path: {推导的路径或 "."}
+   - User question: "{用户描述摘要}"
+   - output_path: `{{HARNESS_MEMORY_DIR}}/notes/codebase-research.md`
+   - rules_dir: `{{HARNESS_MEMORY_DIR}}/notes/rules/`
+   - report_template: `{{REFERENCE}}/explore-report-template.md`
+
+   补充上下文（只读）：`{{HARNESS_MEMORY_DIR}}/plans/codebase-scan.md`（若存在）作为 baseline。
 
 5. 若返回有用结果 → 按 `reference/brownfield-adaptation.md` §A 构建 ESI 表（内部态）。
 6. BLOCKED / 无有用结果 → 静默跳过，仍照常进入 Step 2。此步非阻塞。

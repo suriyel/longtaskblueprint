@@ -79,13 +79,15 @@ Design 阶段易陷入"只看 SRS 转写、不看原文"的细节断片。本 st
 
 从 SRS §4 FR 标题 / §6 外部接口 / §1.4 ESI 提取关键模块名与领域词 → 推导 `--focus`（默认 `architecture,domain,deps` — 复用视角）；能从 SRS 推出单一模块子树时推导 `--path`。
 
-> **DISPATCH** 创建独立 SubAgent（使用 Agent 或 General）— 在 subagent 中加载并执行 skill `long-task:long-task-explore`
+> **DISPATCH** 创建独立 SubAgent（使用 Agent 或 General）— 加载并执行技能 explore-guide，按其流程顺序自行执行全部探索工作（不嵌套分派）
 > Depth: {省略，让 LOC 自检}
 > Focus: {推导的维度，默认 architecture,domain,deps}
 > Path: {推导路径 or "."}
 > User question: "为实现 SRS FR-xxx / FR-yyy / ...，识别存量可直接复用的模块/类/接口/配置；同时标出 SRS 中假定的复用点若与代码实际不符。"
->
-> 备注：若该 sub-skill 在当前 plugin 集合中未安装，subagent 应直接用 Glob / Grep / Read 工具按 focus 维度做等价探索；并参考上游 scan 节点产出 `{{HARNESS_MEMORY_DIR}}/plans/codebase-scan.md`（若存在）作为 baseline。
+> output_path: `{{HARNESS_MEMORY_DIR}}/notes/codebase-research.md`
+> rules_dir: `{{HARNESS_MEMORY_DIR}}/notes/rules/`
+> report_template: `{{REFERENCE}}/explore-report-template.md`
+> 补充上下文（只读）：`{{HARNESS_MEMORY_DIR}}/plans/codebase-scan.md`（若存在）作为 baseline
 
 固定路径 **不入 input**（sub-skill 自行 glob）：`{{HARNESS_MEMORY_DIR}}/plans/srs.md`、`{{HARNESS_MEMORY_DIR}}/notes/rules/`、`{{HARNESS_MEMORY_DIR}}/notes/codebase-research.md`（若存在）。
 
