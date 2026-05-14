@@ -4,8 +4,8 @@
 
 ## 步骤 1：加载上下文
 
-1. 读取 `feature-list.json` -> 按 ID 提取功能对象及 `tech_stack`
-2. 派生功能设计文档路径：`python scripts/feature_paths.py design-doc --feature <id> --must-exist` -> **单次 Read 整份文档**（不带 offset/limit）；工作记忆需同时持有：
+1. 运行 `bp-context task` → 解析 task 对象（id、title、description、srs_trace、dependencies、constraints、assumptions 等）；`tech_stack` 从 `project-context.md` 获取
+2. 派生功能设计文档路径：`{{HARNESS_MEMORY_DIR}}/notes/feature-<id>-design.md`（`<id>` 取自 task.id）→ **单次 Read 整份文档**（不带 offset/limit）；工作记忆需同时持有：
    - §现有代码复用（REUSE/EXTEND/PATTERN 验证依据）
    - §实现摘要（变更文件/类/方法合规依据）
    - §全局约束摘录（§11.1 / §11.5 / §11.6 合规依据）

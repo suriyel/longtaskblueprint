@@ -263,7 +263,7 @@ interface ResourceDTO {
 
 **何时定义内部 API 契约：**
 1. §3.3 中由边连接的任意组件对 → 必须有对应行
-2. 若功能 A 的 feature-list.json 中 `dependencies[]` 包含功能 B，且 A 在运行时调用 B 的方法/API → 必须有对应行
+2. 若功能 A 的 task 对象（`bp-context task`）中 `dependencies[]` 包含功能 B，且 A 在运行时调用 B 的方法/API → 必须有对应行
 3. 两个功能共享持久化状态（同一 DB 表/文件/缓存） → 必须定义共享 schema
 4. **无需定义**: 纯框架级依赖（如功能 B 依赖功能 A 的项目骨架但无运行时调用）
 
@@ -334,7 +334,7 @@ graph LR
 
 ### 11.7 测试与质量工具
 
-> 从 `build-and-compilation.md` 中检测到的测试、覆盖率和变异测试工具。下游 TDD/质量技能使用这些工具名称通过 `get_tool_commands.py` 派生运行命令。
+> 从 `build-and-compilation.md` 中检测到的测试、覆盖率和变异测试工具。下游 TDD/质量技能从 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）获取运行命令。
 
 | 类别 | 工具 | 配置文件 | 运行命令 |
 |----------|------|------------|-------------|

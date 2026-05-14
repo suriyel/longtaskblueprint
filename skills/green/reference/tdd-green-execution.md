@@ -4,8 +4,8 @@
 
 ## 步骤 1：加载上下文
 
-1. 读取 `feature-list.json` → 按 ID 提取功能对象、`tech_stack`
-2. 派生功能设计文档路径：`python scripts/feature_paths.py design-doc --feature <id> --must-exist` → **单次 Read 整份文档**（不带 offset/limit）
+1. 运行 `bp-context task` → 解析 task 对象（id、title、description、srs_trace、dependencies、constraints、assumptions 等）；`tech_stack` 从 `project-context.md` 获取
+2. 派生功能设计文档路径：`{{HARNESS_MEMORY_DIR}}/notes/feature-<id>-design.md`（`<id>` 取自 task.id）→ **单次 Read 整份文档**（不带 offset/limit）
 3. 找到 TDD Red 创建的测试文件（匹配该功能的最近测试文件）
 
 **禁令**：本 SubAgent 不得 Glob / Read / Grep `docs/plans/*-srs.md` 或 `docs/plans/*-design.md`。Design §11 约束已由 feature-design SubAgent 沉淀到 feature.md §全局约束摘录；缺失 → 返 BLOCKED。

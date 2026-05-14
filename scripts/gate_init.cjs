@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // gate_init.cjs —— Init 硬门
 // 检查 init 节点产出的两份产物：
-//   .harness/memory/plans/iter-tasks.json    （bp-tasks 喂入的 items[]）
+//   stdin.loops[<loopId>].tasks  （bp-tasks set 灌入的 items[]）
 //   .harness/memory/plans/project-context.md （下游 wd 消费的全局上下文）
 //
 // 校验逻辑照搬 scripts/validate_features.py（REQUIRED_FIELDS / VALID_STATUSES /
 // VALID_PRIORITIES / SRS_TRACE_PATTERN / 依赖闭包），按 gate_srs.cjs 的
 // stdin/stdout/exit 模式封装。
 //
-// stdin:  {schemaVersion:2, cwd, ...}
+// stdin:  {schemaVersion:2, cwd, loops:{<loopId>:{tasks[],...}}, ...}
 // stdout: 最后一行 JSON {pass:bool, message:string}
 // exit:   0 normal / 2 schema error
 
@@ -35,25 +35,18 @@ function emit(pass, message) {
   process.exit(0);
 }
 
-// ---- A. iter-tasks.json 校验（照搬 validate_features.py validate() 逻辑）----
-function validateTasksJson(filePath) {
+// ---- A. tasks 数组校验（数据来源 = stdin.loops，非磁盘文件）--------------------
+function validateTasksArray(tasks, loopId) {
   const errors = [];
+  const prefix0 = 'loop[' + loopId + ']';
 
-  if (!fs.existsSync(filePath)) return ['iter-tasks.json 未生成: ' + filePath];
-
-  let raw, data;
-  try { raw = fs.readFileSync(filePath, 'utf8'); }
-  catch (e) { return ['读取失败: ' + e.message]; }
-  try { data = JSON.parse(raw); }
-  catch (e) { return ['JSON 解析失败: ' + e.message]; }
-
-  if (!Array.isArray(data)) return ['根必须是 items[] 数组（bp-tasks schema 要求），当前是 ' + (data === null ? 'null' : typeof data)];
-  if (data.length === 0) return ['features 数组为空'];
+  if (!Array.isArray(tasks)) return [prefix0 + ': tasks 必须是数组，当前是 ' + (tasks === null ? 'null' : typeof tasks)];
+  if (tasks.length === 0) return [prefix0 + ': tasks 数组为空'];
 
   const idsSeen = new Set();
-  for (let i = 0; i < data.length; i++) {
-    const feat = data[i];
-    const prefix = 'features[' + i + ']';
+  for (let i = 0; i < tasks.length; i++) {
+    const feat = tasks[i];
+    const prefix = prefix0 + '.tasks[' + i + ']';
 
     if (feat === null || typeof feat !== 'object' || Array.isArray(feat)) {
       errors.push(prefix + ': 必须是对象');
@@ -125,18 +118,18 @@ function validateTasksJson(filePath) {
 
   // 依赖闭包（第二趟）
   const allIds = new Set();
-  for (const f of data) if (f && typeof f === 'object' && f.id !== undefined) {
+  for (const f of tasks) if (f && typeof f === 'object' && f.id !== undefined) {
     allIds.add(typeof f.id + ':' + String(f.id));
   }
-  for (let i = 0; i < data.length; i++) {
-    const feat = data[i];
+  for (let i = 0; i < tasks.length; i++) {
+    const feat = tasks[i];
     if (!feat || typeof feat !== 'object') continue;
     const deps = feat.dependencies;
     if (Array.isArray(deps)) {
       for (const dep of deps) {
         const key = typeof dep + ':' + String(dep);
         if (!allIds.has(key)) {
-          errors.push('features[' + i + '] (id=' + feat.id + '): 依赖 id=' + dep + ' 不存在');
+          errors.push('tasks[' + i + '] (id=' + feat.id + '): 依赖 id=' + dep + ' 不存在');
         }
       }
     }
@@ -201,19 +194,29 @@ function validateContextMd(filePath) {
     process.exit(2);
   }
 
-  const memoryDir = path.join(input.cwd, '.harness', 'memory', 'plans');
-  const tasksPath = path.join(memoryDir, 'iter-tasks.json');
-  const ctxPath = path.join(memoryDir, 'project-context.md');
+  // tasks 校验 — 从 stdin.loops 获取（context get），非磁盘文件
+  const loops = input.loops || {};
+  const loopEntries = Object.entries(loops);
+  let tasksErrors = [];
+  if (loopEntries.length === 0) {
+    tasksErrors = ['未检测到已灌入的 tasks（loops 为空）；请确认 init 节点已调用 bp-tasks set'];
+  } else {
+    // 取第一个有 tasks 的 loop（正常情况下仅一个）
+    const [loopId, loopData] = loopEntries[0];
+    tasksErrors = validateTasksArray(loopData.tasks || [], loopId);
+  }
 
-  const tasksErrors = validateTasksJson(tasksPath);
+  // project-context.md 校验 — 仍为磁盘文件
+  const memoryDir = path.join(input.cwd, '.harness', 'memory', 'plans');
+  const ctxPath = path.join(memoryDir, 'project-context.md');
   const ctxErrors = validateContextMd(ctxPath);
 
   if (tasksErrors.length === 0 && ctxErrors.length === 0) {
-    emit(true, 'Init 校验通过：iter-tasks.json + project-context.md 均合格');
+    emit(true, 'Init 校验通过：tasks（via loops）+ project-context.md 均合格');
   }
 
   const parts = [];
-  if (tasksErrors.length) parts.push('iter-tasks.json: ' + tasksErrors.join('；'));
+  if (tasksErrors.length) parts.push('tasks: ' + tasksErrors.join('；'));
   if (ctxErrors.length) parts.push('project-context.md: ' + ctxErrors.join('；'));
   emit(false, parts.join(' | '));
 })();

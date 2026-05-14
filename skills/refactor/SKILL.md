@@ -13,7 +13,7 @@ description: "TDD 重构阶段 -- 清理代码、运行静态分析、验证 S11
 {{TASK_GET}}
 ```
 
-输出 JSON，解析 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，不要再自行锁定 / 改写 iter-tasks.json 的 current 字段。
+输出 JSON，解析 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，通过上方命令获取。无需手动管理任务状态。
 
 ## 你的任务
 

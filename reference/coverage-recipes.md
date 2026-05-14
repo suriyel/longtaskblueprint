@@ -49,7 +49,7 @@ tests_dir = "tests/"
 runner = "python -m pytest -x --tb=short"
 ```
 
-> 运行时命令：`python scripts/get_tool_commands.py feature-list.json`
+> 工具命令已记录在 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）
 
 ---
 
@@ -161,7 +161,7 @@ pitest {
 }
 ```
 
-> 运行时命令：`python scripts/get_tool_commands.py feature-list.json`
+> 工具命令已记录在 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）
 
 ---
 
@@ -216,7 +216,7 @@ pitest {
 }
 ```
 
-> 运行时命令：`python scripts/get_tool_commands.py feature-list.json`
+> 工具命令已记录在 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）
 
 ---
 
@@ -270,7 +270,7 @@ pitest {
 }
 ```
 
-> 运行时命令：`python scripts/get_tool_commands.py feature-list.json`
+> 工具命令已记录在 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）
 
 ---
 
@@ -324,7 +324,7 @@ reporters:
   - SQLite
 ```
 
-> 运行时命令：`python scripts/get_tool_commands.py feature-list.json`
+> 工具命令已记录在 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）
 
 ---
 
@@ -346,7 +346,7 @@ if(ENABLE_COVERAGE)
 endif()
 ```
 
-> 运行时命令：`python scripts/get_tool_commands.py feature-list.json`
+> 工具命令已记录在 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）
 
 ---
 
@@ -403,7 +403,7 @@ endif()
 
 报告：`target/site/scoverage/{index.html, scoverage.xml}`；XML 根元素属性 `statement-rate` / `branch-rate` 可供脚本解析。
 
-> 运行时命令：`python scripts/get_tool_commands.py feature-list.json`
+> 工具命令已记录在 `{{HARNESS_MEMORY_DIR}}/notes/tool-commands-guide.md`（init 节点产出）
 
 ---
 
