@@ -9,7 +9,7 @@
    - exit 0 → **单次 Read 整份文档**（不带 offset/limit）
    - exit 1 → BLOCKED：设计文档缺失，终止（主 orchestrator 已做硬前置，理论上不该在此触发）
 
-**禁令**：本 SubAgent 不得 Glob / Read / Grep `docs/plans/*-srs.md` 或 `docs/plans/*-design.md`。所有上游约束（SRS FR / Design §11）必须从 feature.md §全局约束摘录 + §接口契约 + §实现摘要 读取。若缺失 → 返 BLOCKED，不自行回访上游。
+**禁令**：不得 Glob / Read / Grep `{{HARNESS_MEMORY_DIR}}/plans/*-srs.md` 或 `{{HARNESS_MEMORY_DIR}}/plans/*-design.md`。所有上游约束（SRS FR / Design §11）必须从 feature.md §全局约束摘录 + §接口契约 + §实现摘要 读取。若缺失 → 返 BLOCKED，不自行回访上游。
 
 ### 步骤 1b：探索相关现有测试
 
