@@ -17,7 +17,7 @@ description: "TDD Red 阶段 -- 为功能测试清单编写失败测试。"
 
 ## 你的任务
 
-1. 读取执行规则：`reference/tdd-red-execution.md`
+1. 读取执行规则：`{{SKILL_DIR}}/reference/tdd-red-execution.md`
 2. 读取规则：`{{REFERENCE}}/iron-law.md`，`{{HARNESS_MEMORY_DIR}}/notes/rules/`
 3. 读取反模式：`{{REFERENCE}}/testing-anti-patterns.md`
 

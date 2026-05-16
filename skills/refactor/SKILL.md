@@ -17,7 +17,7 @@ description: "TDD 重构阶段 -- 清理代码、运行静态分析、验证 S11
 
 ## 你的任务
 
-1. 阅读执行规则：`reference/tdd-refactor-execution.md`
+1. 阅读执行规则：`{{SKILL_DIR}}/reference/tdd-refactor-execution.md`
 2. 阅读规则：`{{REFERENCE}}/iron-law.md`、`{{HARNESS_MEMORY_DIR}}/notes/rules/`
 
 ## 关键约束
