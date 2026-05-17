@@ -19,8 +19,8 @@ description: "在 TDD 之前产出**当前任务**的功能级详细设计文档
 
 ## 你的任务
 
-1. 读取执行规则：`{{SKILL_DIR}}/reference/feature-design-execution.md`
-2. 读取模板：`{{SKILL_DIR}}/reference/feature-design-template.md`
+1. 读取执行规则：`reference/feature-design-execution.md`
+2. 读取模板：`reference/feature-design-template.md`
 3. 单次全量 Read 上下游：
    - SRS：`{{HARNESS_MEMORY_DIR}}/plans/srs.md`
    - 整体设计：`{{HARNESS_MEMORY_DIR}}/plans/design.md`
@@ -47,7 +47,7 @@ description: "在 TDD 之前产出**当前任务**的功能级详细设计文档
 
 - **本节点只产出设计文档，不做 TDD**
 - **SRS/Design 模糊不得假设** —— 上报 BLOCKED 或写入「澄清附录」让用户介入
-- **遇错系统化调试** —— 读 `{{REFERENCE}}/systematic-debugging.md`；追根因不猜
+- **遇错系统化调试** —— 读 `{{SHARE-REFERENCE}}/systematic-debugging.md`；追根因不猜
 
 ## 红旗信号
 

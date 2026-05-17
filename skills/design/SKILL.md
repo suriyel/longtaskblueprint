@@ -64,7 +64,7 @@ Design 阶段易陷入"只看 SRS 转写、不看原文"的细节断片。本 st
 
 ## Step 2a — 加载设计模板
 
-用户指定路径优先，否则加载 `{{REFERENCE}}/design-template.md`。验证 `.md` 且含 `## ` 标题。
+用户指定路径优先，否则加载 `{{SHARE-REFERENCE}}/design-template.md`。验证 `.md` 且含 `## ` 标题。
 
 - 模板含 §0 项目结构 / §1 设计驱动 / §3 架构（3.1-3.5，§3.4 技术栈决策承载单方案关键决策点）/ §4 关键功能设计 / §5 数据模型 / §6 API（6.1 外部 / 6.2 内部 API 契约含 6.2.1/6.2.2/6.2.3）/ §7 第三方依赖 / §8 测试策略 / §10 待解决问题 / §11 代码库约定
 - **按需省略规则**：L2/L3 纯规约式增量场景，§1 / §3.1-§3.3 / §5 / §6.1 / §7 / §8 / §10 等可整节标 `[不适用]` + 附一句理由；§6.2 以 6.2.1 / 6.2.2 子表表达即可；**§3.4 技术栈决策（至少含新增/修改决策的替代排除理由）/ §6.2 / §11 永不可省**
@@ -86,7 +86,7 @@ Design 阶段易陷入"只看 SRS 转写、不看原文"的细节断片。本 st
 > User question: "为实现 SRS FR-xxx / FR-yyy / ...，识别存量可直接复用的模块/类/接口/配置；同时标出 SRS 中假定的复用点若与代码实际不符。"
 > output_path: `{{HARNESS_MEMORY_DIR}}/notes/codebase-research.md`
 > rules_dir: `{{HARNESS_MEMORY_DIR}}/notes/rules/`
-> report_template: `{{REFERENCE}}/explore-report-template.md`
+> report_template: `{{SHARE-REFERENCE}}/explore-report-template.md`
 > 补充上下文（只读）：`{{HARNESS_MEMORY_DIR}}/plans/codebase-scan.md`（若存在）作为 baseline
 
 固定路径 **不入 input**（sub-skill 自行 glob）：`{{HARNESS_MEMORY_DIR}}/plans/srs.md`、`{{HARNESS_MEMORY_DIR}}/notes/rules/`、`{{HARNESS_MEMORY_DIR}}/notes/codebase-research.md`（若存在）。
@@ -244,7 +244,7 @@ schema、关系、存储策略。有持久存储必须 Mermaid `erDiagram`。
 
 ## Step 5 — 草稿落盘（未 commit）
 
-读取 Step 2a 加载的模板（`{{REFERENCE}}/design-template.md` 或用户自定义）：
+读取 Step 2a 加载的模板（`{{SHARE-REFERENCE}}/design-template.md` 或用户自定义）：
 1. 保留标题结构
 2. 每个标题下替换指导文本为 Step 4 / 4b 合成的章节内容
 3. 顶部元数据必须包含：`日期`、**`状态`: 待审批**、`SRS 引用`、`输入档位`（从 SRS 元数据继承）

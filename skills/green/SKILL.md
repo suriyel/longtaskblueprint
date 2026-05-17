@@ -17,8 +17,8 @@ description: "TDD Green 阶段 -- 编写最小实现使所有测试通过。"
 
 ## 你的任务
 
-1. 读取执行规则：`{{SKILL_DIR}}/reference/tdd-green-execution.md`
-2. 读取规则：`{{REFERENCE}}/iron-law.md`，`{{HARNESS_MEMORY_DIR}}/notes/rules/`
+1. 读取执行规则：`reference/tdd-green-execution.md`
+2. 读取规则：`{{SHARE-REFERENCE}}/iron-law.md`，`{{HARNESS_MEMORY_DIR}}/notes/rules/`
 
 ## 实现约束（唯一权威源 = feature 设计文档）
 

@@ -17,9 +17,9 @@ description: "TDD Red 阶段 -- 为功能测试清单编写失败测试。"
 
 ## 你的任务
 
-1. 读取执行规则：`{{SKILL_DIR}}/reference/tdd-red-execution.md`
-2. 读取规则：`{{REFERENCE}}/iron-law.md`，`{{HARNESS_MEMORY_DIR}}/notes/rules/`
-3. 读取反模式：`{{REFERENCE}}/testing-anti-patterns.md`
+1. 读取执行规则：`reference/tdd-red-execution.md`
+2. 读取规则：`{{SHARE-REFERENCE}}/iron-law.md`，`{{HARNESS_MEMORY_DIR}}/notes/rules/`
+3. 读取反模式：`{{SHARE-REFERENCE}}/testing-anti-patterns.md`
 
 ## 规格输入（唯一权威源 = feature 设计文档）
 
@@ -40,7 +40,7 @@ description: "TDD Red 阶段 -- 为功能测试清单编写失败测试。"
 ## 关键约束
 
 - 先写集成测试，再写单元测试
-- 按 `{{REFERENCE}}/iron-law.md` §R1-R9 执行（本文件不重复）
+- 按 `{{SHARE-REFERENCE}}/iron-law.md` §R1-R9 执行（本文件不重复）
 - 所有测试必须失败（退出码 != 0 为成功）。退出码 0 表示测试有误 — 重写
 - 遵循相关现有测试约定以保持一致性。§11.5 和测试清单优先
 - 测试输出协议：先静默运行 → 若 PASS（错误！）重写；若全部 FAIL（正确！）完成。不确定 → 详细输出查错

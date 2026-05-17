@@ -22,7 +22,7 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
    - `coding-constraints.md` — 二方件（内部强制库）约束
    - `build-and-compilation.md` — 构建系统约束
    - `coding-style.md` — 风格约束
-3. 模板加载延后到 Step 1.2 — 由档位评估结果决定填写力度（模板只有一个 `{{REFERENCE}}/srs-template.md`，空洞章节按需省略或标 `[不适用]`）。
+3. 模板加载延后到 Step 1.2 — 由档位评估结果决定填写力度（模板只有一个 `{{SHARE-REFERENCE}}/srs-template.md`，空洞章节按需省略或标 `[不适用]`）。
 
 ## Step 1.2 — 输入成熟度评估（内部，不与用户交互）
 
@@ -42,7 +42,7 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
 **grep 对象**：包含 `{{HARNESS_MEMORY_DIR}}/intent/user-original-intent.md` 全文 + 用户在会话内补充的需求文档。档位评估的输入是用户**原话**，不是任何二次产物（不要拿尚未生成的 SRS 草稿评档）。
 
 **模板加载**：
-- 用户指定模板路径优先；否则加载 `{{REFERENCE}}/srs-template.md`
+- 用户指定模板路径优先；否则加载 `{{SHARE-REFERENCE}}/srs-template.md`
 - 验证 `.md` 且含至少一个 `## ` 标题
 
 **输出**：`{maturity_level: L1|L2|L3}`，留主 agent 上下文驱动后续 step。Step 8.2 保存时写入 SRS 元数据 `输入档位` 字段。
@@ -75,7 +75,7 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
 | C | 关键操作/事件清单 | ✅ | ⚪ | ❌ | 动词清单 + 触发条件 |
 | D | 偏好 vs 约束剥离 | ✅ | ⚪ | ❌ | "用 Redis"/"用 React" → ASM；"5ms 响应" → CON；混合句必须分离 |
 | E | 隐含假设 / 待澄清 | ✅ | ✅ | ✅ | 用户写了 X 但没说 X 在 Y 情况下如何 — 喂 Step 3 Gap Fill |
-| F | ESI 冲突点 / 复用点 | brownfield | brownfield | brownfield | 与 `{{HARNESS_MEMORY_DIR}}/notes/rules/` 或 codebase-scan 报告交叉对照（参见 `{{SKILL_DIR}}/reference/brownfield-adaptation.md`） |
+| F | ESI 冲突点 / 复用点 | brownfield | brownfield | brownfield | 与 `{{HARNESS_MEMORY_DIR}}/notes/rules/` 或 codebase-scan 报告交叉对照（参见 `reference/brownfield-adaptation.md`） |
 | **G** | **硬精确条目清单** | ⚪ | **✅** | **✅** | **参数名 / 字段名 / 文件路径 / 类型 / 范围 / 默认值 / 枚举值 / ID 命名 — 锁定 1:1 转写，禁改写禁稀释** |
 
 ### 笔记 G 详细规则（L2/L3 关键）
@@ -114,11 +114,11 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
    - User question: "{用户描述摘要}"
    - output_path: `{{HARNESS_MEMORY_DIR}}/notes/codebase-research.md`
    - rules_dir: `{{HARNESS_MEMORY_DIR}}/notes/rules/`
-   - report_template: `{{REFERENCE}}/explore-report-template.md`
+   - report_template: `{{SHARE-REFERENCE}}/explore-report-template.md`
 
    补充上下文（只读）：`{{HARNESS_MEMORY_DIR}}/plans/codebase-scan.md`（若存在）作为 baseline。
 
-5. 若返回有用结果 → 按 `{{SKILL_DIR}}/reference/brownfield-adaptation.md` §A 构建 ESI 表（内部态）。
+5. 若返回有用结果 → 按 `reference/brownfield-adaptation.md` §A 构建 ESI 表（内部态）。
 6. BLOCKED / 无有用结果 → 静默跳过，仍照常进入 Step 2。此步非阻塞。
 
 ## Step 2 — 按 SRS 范式重写（内部，不与用户交互）
@@ -132,7 +132,7 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
    **禁止保留用户原词作为 EARS 主体**。原文段落仅作为来源行号引用，不作为 EARS 文本来源。
 2. **分类**：按 ID 前缀归入 FR / CON / ASM / IFR / EXC（详见 Step 4.1）。
    实现细节（笔记 D 已剥离）归 ASM / CON / IFR，**不**作为 FR。
-3. **交叉对照 ESI**（仅 brownfield，笔记 F）：标注 `NEW` / `MODIFY` / `EXTEND` / `REUSE`（REUSE → ASM-xxx — 见 `{{SKILL_DIR}}/reference/brownfield-adaptation.md` §C）
+3. **交叉对照 ESI**（仅 brownfield，笔记 F）：标注 `NEW` / `MODIFY` / `EXTEND` / `REUSE`（REUSE → ASM-xxx — 见 `reference/brownfield-adaptation.md` §C）
 4. **§1.3 项目陈述写作**：基于笔记 A，2-3 段领域语言叙述；**禁原话痕迹**（Group P1/P2 审查）
 
 ### L2 半成品规约处理 ★
@@ -183,7 +183,7 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
 
 **仅**针对 Step 2 标注的 gap 提问。不重复用户已在输入文档中写明的内容。
 
-若 brownfield：使用 `{{SKILL_DIR}}/reference/brownfield-adaptation.md` §B 的校核式问句模板（"我从输入提取到 FR-X。它与 ESI 现存 Y 是替换/扩展/并行？"）。
+若 brownfield：使用 `reference/brownfield-adaptation.md` §B 的校核式问句模板（"我从输入提取到 FR-X。它与 ESI 现存 Y 是替换/扩展/并行？"）。
 
 **Gap Fill 输出**：用户回答整合到候选 FR 草表与 §1.2 排除范围 / §6 约束 / §7 假设。
 
@@ -325,7 +325,7 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
 
 ### 8.2 保存
 
-读取 Step 1.2 加载的模板（`{{REFERENCE}}/srs-template.md` 或用户自定义）：
+读取 Step 1.2 加载的模板（`{{SHARE-REFERENCE}}/srs-template.md` 或用户自定义）：
 1. 保留标题结构
 2. 每个标题下替换指导文本为批准内容
 3. 顶部元数据若无则加：`日期`、`状态`、`标准`（ISO/IEC/IEEE 29148）、`输入档位`（L1/L2/L3）、`Single-Round: Yes/No`（若适用）
