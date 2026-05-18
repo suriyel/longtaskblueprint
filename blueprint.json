@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "id": "long-task-flow",
   "version": "1.0.0",
-  "title": "Long-Task 主管线 (harness-blueprint-adapter 转化版)",
+  "title": "Long-Task IPD",
   "description": "由 D:\\03PyDemo\\longtaskforagent 主链 (codebase-scanner / requirements / design / init / work-design+feature-design / tdd-red / tdd-green / tdd-refactor) 通过 harness-blueprint-adapter 转化产出。schemaVersion=3，含 SRS 与 Design 双硬门、loop 体内 R/G/R 三节点 + gate_static 硬门，所有产物落 .harness/memory/。",
   "startNode": "scan",
   "nodes": [
