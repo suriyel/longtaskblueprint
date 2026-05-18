@@ -118,7 +118,8 @@
             "onFail": {
               "rewindTo": "red",
               "ticketTitle": "Green 失败 — 重审 Red 测试",
-              "maxAttempts": 2
+              "maxAttempts": 2,
+              "when": "status != \"ok\""
             }
           },
           {
