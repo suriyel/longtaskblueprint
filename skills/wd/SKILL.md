@@ -18,7 +18,7 @@ description: "在 TDD 之前产出**当前任务**的功能级详细设计文档
 3. 单次全量 Read 上下游：
    - SRS：`{{HARNESS_MEMORY_DIR}}/plans/srs.md`
    - 整体设计：`{{HARNESS_MEMORY_DIR}}/plans/design.md`
-   - 项目上下文：`{{HARNESS_MEMORY_DIR}}/plans/project-context.md`（init 产出 — tech_stack 解析后权威源；沉淀进 feature.md §11.7 时优先于 design.md §11.7）
+   - 项目上下文：`{{HARNESS_MEMORY_DIR}}/plans/project-context.md`（init 产出 — tech_stack 与项目级 constraints/assumptions 解析后权威源；tech_stack 沉淀进 feature.md §11.7 时优先于 design.md §11.7）
 4. 读取代码库约定（如存在）：`{{HARNESS_MEMORY_DIR}}/notes/rules/*.md`
 
 ## 关键约束

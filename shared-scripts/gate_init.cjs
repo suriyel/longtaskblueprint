@@ -92,21 +92,8 @@ function validateTasksArray(tasks, loopId) {
       }
     }
 
-    // constraints / assumptions —— per-task 必填字段（实现/需求一致性关键）
-    // SKILL.md 要求每个 task 从 SRS §约束 / §假设与依赖 复制对应 CON/ASM 项。
-    for (const k of ['constraints', 'assumptions']) {
-      if (!(k in feat)) {
-        errors.push(prefix + ' (id=' + fid + '): 缺必填字段 "' + k + '"（应复制 SRS 对应 CON/ASM 项；无则填空数组）');
-      } else if (!Array.isArray(feat[k])) {
-        errors.push(prefix + ' (id=' + fid + '): "' + k + '" 必须是数组，当前 ' + typeof feat[k]);
-      } else {
-        for (let i2 = 0; i2 < feat[k].length; i2++) {
-          if (typeof feat[k][i2] !== 'string' || feat[k][i2].trim() === '') {
-            errors.push(prefix + ' (id=' + fid + '): ' + k + '[' + i2 + '] 必须是非空字符串');
-          }
-        }
-      }
-    }
+    // constraints / assumptions 已收敛为项目级单一源 project-context.md（见 validateContextMd）。
+    // task 对象不再承载这两个字段，故此处不做 per-task 校验。
   }
 
   // 依赖闭包（第二趟）

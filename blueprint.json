@@ -222,12 +222,6 @@
         "tech_stack": {
           "type": "object"
         },
-        "constraints": {
-          "type": "array"
-        },
-        "assumptions": {
-          "type": "array"
-        },
         "single_round": {
           "type": "boolean"
         }

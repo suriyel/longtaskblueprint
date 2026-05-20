@@ -4,7 +4,7 @@
 
 ## 步骤 1：加载上下文
 
-1. 运行 `bp-context task` → 解析 task 对象（id、title、description、srs_trace、dependencies、constraints、assumptions 等）；`tech_stack` 从 `project-context.md` 获取
+1. 运行 `bp-context task` → 解析 task 对象（id、title、description、srs_trace、dependencies 等）；`tech_stack` / `constraints` / `assumptions` 从 `project-context.md` 获取
 2. 派生功能设计文档路径：`{{HARNESS_MEMORY_DIR}}/notes/feature-<id>-design.md`（`<id>` 取自 task.id）→ **单次 Read 整份文档**（不带 offset/limit）；工作记忆需同时持有：
    - §现有代码复用（REUSE/EXTEND/PATTERN 验证依据）
    - §实现摘要（变更文件/类/方法合规依据）

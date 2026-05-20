@@ -4,7 +4,7 @@
 
 ## 步骤 1：加载上下文
 
-1. 运行 `bp-context task` → 解析 task 对象（id、title、description、srs_trace、dependencies、constraints、assumptions 等）；`tech_stack` 从 `project-context.md` 获取
+1. 运行 `bp-context task` → 解析 task 对象（id、title、description、srs_trace、dependencies 等）；`tech_stack` / `constraints` / `assumptions` 从 `project-context.md` 获取
 2. 派生功能设计文档路径：`{{HARNESS_MEMORY_DIR}}/notes/feature-<id>-design.md`（`<id>` 取自 task.id）→ 文件存在 → **单次 Read 整份文档**（不带 offset/limit）
    - exit 0 → **单次 Read 整份文档**（不带 offset/limit）
    - exit 1 → BLOCKED：设计文档缺失，终止（主 orchestrator 已做硬前置，理论上不该在此触发）

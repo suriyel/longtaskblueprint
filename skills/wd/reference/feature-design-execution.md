@@ -21,7 +21,7 @@
    - 输出：`{{HARNESS_MEMORY_DIR}}/notes/feature-<id>-design.md`（`<id>` 取自 `bp-context task` 输出的 `task.id`）
 2. **单次 Read `srs_path` 整份**（不带 offset/limit）— 含 §1 全景 / 全部 FR-xxx / §约束假设
 3. **单次 Read `dsgn_path` 整份**（不带 offset/limit）— 含 §3 / §4.N（全部）/ §6.2 / §11.1 / §11.4 / §11.5 / §11.6 / §11.7
-4. **功能对象** -- 从 `bp-context task` 输出解析：ID、标题、描述、srs_trace、依赖、优先级（如有 verification_steps）；根级 `constraints[]` / `assumptions[]`
+4. **功能对象** -- 从 `bp-context task` 输出解析：ID、标题、描述、srs_trace、依赖、优先级（如有 verification_steps）。项目级 `constraints` / `assumptions` 从 `{{HARNESS_MEMORY_DIR}}/plans/project-context.md` 读取（init 产出的权威源；非 task 对象字段）
 5. **现有代码** -- 如果依赖功能已通过，读取其公开接口（导入、类/函数签名）
 6. **代码库约定** -- 读取 `{{HARNESS_MEMORY_DIR}}/notes/rules/*.md`（若存在）
 
