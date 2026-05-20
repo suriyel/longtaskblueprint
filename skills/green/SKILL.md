@@ -7,13 +7,7 @@ description: "TDD Green 阶段 -- 编写最小实现使所有测试通过。"
 
 编写最小代码使所有测试通过。请自行读取所有文档。
 
-## 获取当前任务
-
-```bash
-{{TASK_GET}}
-```
-
-输出 JSON，解析 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，通过上方命令获取。无需手动管理任务状态。
+解析 {{TASK_GET}} 输出的 JSON，取 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，无需手动管理任务状态。
 
 ## 你的任务
 

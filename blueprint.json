@@ -20,14 +20,9 @@
     },
     {
       "id": "gate_srs",
-      "kind": "script",
       "title": "SRS 硬门",
       "x": 500,
       "y": 100,
-      "script": {
-        "path": "shared-scripts/gate_srs.cjs",
-        "timeoutMs": 15000
-      },
       "onFail": {
         "rewindTo": "req",
         "ticketTitle": "SRS 不达标",
@@ -43,14 +38,9 @@
     },
     {
       "id": "gate_design",
-      "kind": "script",
       "title": "Design 硬门",
       "x": 900,
       "y": 100,
-      "script": {
-        "path": "shared-scripts/gate_design.cjs",
-        "timeoutMs": 15000
-      },
       "onFail": {
         "rewindTo": "design",
         "ticketTitle": "Design 不达标",
@@ -66,14 +56,9 @@
     },
     {
       "id": "gate_init",
-      "kind": "script",
       "title": "Init 硬门",
       "x": 1300,
       "y": 100,
-      "script": {
-        "path": "shared-scripts/gate_init.cjs",
-        "timeoutMs": 15000
-      },
       "onFail": {
         "rewindTo": "init",
         "ticketTitle": "Init 产物不达标",

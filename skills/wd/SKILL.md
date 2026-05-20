@@ -9,13 +9,7 @@ description: "在 TDD 之前产出**当前任务**的功能级详细设计文档
 
 > **对 `category: "bugfix"` 任务**：精简模式，重点关注 (1) 根因文档，(2) 定向修复方案，(3) 回归测试清单。
 
-## 获取当前任务
-
-```bash
-{{TASK_GET}}
-```
-
-输出 JSON，解析 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，通过上方命令获取。无需手动管理任务状态。
+解析 {{TASK_GET}} 输出的 JSON，取 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，无需手动管理任务状态。
 
 ## 你的任务
 

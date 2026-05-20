@@ -7,13 +7,7 @@ description: "TDD 重构阶段 -- 清理代码、运行静态分析、验证 S11
 
 重构代码、运行静态分析并验证代码库合规性。请自行阅读所有文档。
 
-## 获取当前任务
-
-```bash
-{{TASK_GET}}
-```
-
-输出 JSON，解析 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，通过上方命令获取。无需手动管理任务状态。
+解析 {{TASK_GET}} 输出的 JSON，取 `task.id` / `task.title` / `task.description` / 其他业务字段。loop 引擎已挑好当前任务，无需手动管理任务状态。
 
 ## 你的任务
 
