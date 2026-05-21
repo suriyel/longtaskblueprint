@@ -31,15 +31,27 @@
       }
     },
     {
+      "id": "bdd",
+      "title": "BDD 用例 → 需求完备性评审",
+      "x": 700,
+      "y": 100,
+      "onFail": {
+        "rewindTo": "req",
+        "ticketTitle": "需求待澄清 — 见 BDD 推导的待澄清清单",
+        "maxAttempts": 3,
+        "when": "status != \"ok\""
+      }
+    },
+    {
       "id": "design",
       "title": "设计文档",
-      "x": 700,
+      "x": 900,
       "y": 100
     },
     {
       "id": "gate_design",
       "title": "Design 硬门",
-      "x": 900,
+      "x": 1100,
       "y": 100,
       "onFail": {
         "rewindTo": "design",
@@ -51,13 +63,13 @@
     {
       "id": "init",
       "title": "初始化 + 灌入 iter",
-      "x": 1100,
+      "x": 1300,
       "y": 100
     },
     {
       "id": "gate_init",
       "title": "Init 硬门",
-      "x": 1300,
+      "x": 1500,
       "y": 100,
       "onFail": {
         "rewindTo": "init",
@@ -70,7 +82,7 @@
       "id": "iter",
       "kind": "loop",
       "title": "按 feature 迭代 R/G/R",
-      "x": 1500,
+      "x": 1700,
       "y": 100,
       "iterator": {
         "kind": "tasks",
@@ -155,7 +167,12 @@
     },
     {
       "from": "gate_srs",
-      "to": "design"
+      "to": "bdd"
+    },
+    {
+      "from": "bdd",
+      "to": "design",
+      "when": "status == \"ok\""
     },
     {
       "from": "design",

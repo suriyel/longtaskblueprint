@@ -15,6 +15,18 @@ description: "当无 SRS、无设计文档、无任务列表时使用 — 读取
 在呈现 SRS 并获得用户批准之前，不可调用任何设计 skill、实现 skill、编写任何代码、搭建任何项目、或采取任何设计/实现行动。每个项目都适用，无论看起来多简单。
 </HARD-GATE>
 
+## Step 0 — 下游打回处理（最先执行）
+
+本节点可能因下游 **BDD 节点反推出需求缺口**而被打回重跑。先甄别本轮是「从 0 打磨」还是「定向澄清」：
+
+1. 运行 {{TICKETS_GET}} —— 读取指向本节点的 open ticket。
+2. **存在 open ticket（下游打回）**：其 `message` 即「待澄清清单」（逐条 `FR-xxx + 缺什么 / 未提及的行为`）。本轮**只就清单内的 gap 工作**：
+   - 跳过全量打磨，直接进 Step 3 Gap Fill，用 `AskUserQuestion`（≤4 问/轮）仅就这些 gap 向用户澄清；
+   - 把澄清结果**增量合并**进既有 `{{HARNESS_MEMORY_DIR}}/plans/srs.md` 对应的 FR / AC / CON（缺 AC 补 AC、未提及的补新 FR 并编号、不明确的定死取值/默认值/错误处理）；
+   - **不重做、不重写**已批准的其余章节；保留首行 `**状态**: 已批准`，Git commit 增量改动；
+   - 完成后照常推进（advance ok）。无需再跑 Step 1~Step 8 的全量流程。
+3. **无 open ticket**：属用户从 0 启动或常规续写，照常从下面的 Step 1 全量执行。
+
 ## Step 1 — 读上下文
 
 1. **优先 Read `{{HARNESS_MEMORY_DIR}}/intent/user-original-intent.md`**。若用户在本会话另行上传 / 粘贴更详细的需求文档，与原话一并阅读。逐段标注：哪些是目标声明、哪些是行为规约、哪些是约束、哪些是实现偏好。
