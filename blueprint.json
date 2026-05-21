@@ -43,15 +43,27 @@
       }
     },
     {
+      "id": "gate_bdd",
+      "title": "BDD 规范性硬门",
+      "x": 900,
+      "y": 100,
+      "onFail": {
+        "rewindTo": "bdd",
+        "ticketTitle": "BDD 用例不规范 — 见校验报告",
+        "maxAttempts": 3,
+        "when": "status != \"ok\""
+      }
+    },
+    {
       "id": "design",
       "title": "设计文档",
-      "x": 900,
+      "x": 1100,
       "y": 100
     },
     {
       "id": "gate_design",
       "title": "Design 硬门",
-      "x": 1100,
+      "x": 1300,
       "y": 100,
       "onFail": {
         "rewindTo": "design",
@@ -63,13 +75,13 @@
     {
       "id": "init",
       "title": "初始化 + 灌入 iter",
-      "x": 1300,
+      "x": 1500,
       "y": 100
     },
     {
       "id": "gate_init",
       "title": "Init 硬门",
-      "x": 1500,
+      "x": 1700,
       "y": 100,
       "onFail": {
         "rewindTo": "init",
@@ -82,7 +94,7 @@
       "id": "iter",
       "kind": "loop",
       "title": "按 feature 迭代 R/G/R",
-      "x": 1700,
+      "x": 1900,
       "y": 100,
       "iterator": {
         "kind": "tasks",
@@ -171,8 +183,12 @@
     },
     {
       "from": "bdd",
-      "to": "design",
+      "to": "gate_bdd",
       "when": "status == \"ok\""
+    },
+    {
+      "from": "gate_bdd",
+      "to": "design"
     },
     {
       "from": "design",
