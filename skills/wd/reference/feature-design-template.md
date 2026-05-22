@@ -246,7 +246,7 @@ flowchart TD
 
 > **「追踪到」列**：源自 BDD 行为的行写其 `BDD-xxx` id（必要时并列 FR-AC / 设计章节，如 `BDD-001（FR-002 AC-1）`）；源自设计内部的行（§4.N 接口、UML 分支、集成边界）写设计章节。**bdd.json 中每个相关场景至少对应一行带其 BDD-xxx**——这是 TDD Red 打标与 gate_red 机检的追溯锚点。
 
-> ID 为排序序号，不作为测试函数名前缀。测试函数名从类别+输入列派生描述性名称（如 FUNC/error + "空字符串" → `test_validate_rejects_empty_string`）。
+> ID 为排序序号，不作为测试函数名前缀；BDD 追溯编号只进注释、不进方法名。测试方法名按三段式 `given_<前置>_when_<触发>_then_<期望>` 命名，复述该行的前置/触发/期望（随技术栈调整大小写与分隔，如 Java `givenXxx_whenYyy_thenZzz`、JS `test('given… when… then…')`）。
 >
 > **WRONG_IMPL 列**直接供 TDD Red SubAgent 作为测试函数 `# WRONG_IMPL:` 注释内容（iron-law R4）。设计阶段已预分析 → TDD 阶段直接引用，不再二次推导。
 

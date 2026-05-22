@@ -35,7 +35,7 @@ negative_test_count / total_test_count >= 0.40
 - 测试体含 `pytest.raises` / `assertRaises` / 断言异常类型
 - 断言 HTTP 4xx / 5xx 状态码
 - 断言返回空集 / None / 拒绝 / 失败状态
-- 测试名含 `_error_` / `_rejects_` / `_invalid_` / `_fails_`
+- 测试名 / `then` 段表达拒绝、失败或异常（命名风格无关，如 `then_reject*` / `then_raise*` / `*_error_*` / `*_rejects_*` / `*_invalid_*` / `*_fails_*`）
 
 ## 规则 R3：低价值断言 ≤ 20%
 
