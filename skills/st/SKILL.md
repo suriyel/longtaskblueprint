@@ -49,7 +49,7 @@ Read `{{HARNESS_MEMORY_DIR}}/plans/bdd.json`，对**每一条** scenario，在**
 ### 7. 缺陷 Triage + 逃逸分析
 - 按 Critical/Major/Minor/Cosmetic 分级；Critical/Major 阻塞 Go。
 - 每个缺陷标 **Escaped From**（Unit / Behavior-Gate / Mock-Leaked / Integration / Spec）以暴露系统性缺口。
-- 存在 Critical/Major：把受影响 task 在引擎里标回 failing 并回 loop 修（本节点 {{ADVANCE_BLOCKED}} 说明，由上层决策回退），修后重跑受影响类别。
+- 存在 Critical/Major（含任一真实环境 BDD 对账 FAIL）：本节点**不改实现代码**（ST 期间无新特性）；改为按 Step 9 为每个根因缺陷建一条 `bugfix-task` 追加进 `iter` loop，由引擎回卷走 TDD（red→green→refactor→gate_behavior）定向修复并补回归测试。
 
 ### 8. 验收报告（结构化 JSON —— 权威产物，供 gate_st 机检核实）
 生成 `{{HARNESS_MEMORY_DIR}}/plans/st-acceptance.json`（**这是 gate_st 校验的权威验收报告**，字段如下）：
@@ -85,9 +85,29 @@ Read `{{HARNESS_MEMORY_DIR}}/plans/bdd.json`，对**每一条** scenario，在**
 
 ### 9. Verdict + 收尾
 - 按出口标准（回归全绿 / 每边界真实集成 / 全部 BDD 场景对账 PASS / 无未关闭 Critical/Major / RTM 100%）给 Go / Conditional-Go / No-Go，写入报告。
-- **收尾**：
-  - `st-acceptance.json` 齐全且 Go/Conditional-Go → {{ADVANCE_OK artifact={{HARNESS_MEMORY_DIR}}/plans/st-acceptance.json}}（随后进入 `gate_st` 对账硬门）
-  - 存在未关闭 Critical/Major（含任一 BDD 对账 FAIL）/ 环境起不来 / 全量测试跑不通 → {{ADVANCE_BLOCKED notes=<原因与受影响 task / scenario>}}
+- **收尾按三态分流**：
+
+  **A. Go / Conditional-Go**（`st-acceptance.json` 齐全、无未关闭 Critical/Major）→ {{ADVANCE_OK artifact={{HARNESS_MEMORY_DIR}}/plans/st-acceptance.json}}（进入 `gate_st` 对账硬门）。
+
+  **B. 存在真实缺陷**（任一真实环境 BDD 对账 FAIL，或未关闭 Critical/Major）→ 为**每个根因缺陷**建一条 `bugfix-task` 追加进 `iter` loop 回卷修复，**不在本节点改代码**：
+  1. 读 {{TASKS_GET}} 拿现有任务（取已用 id 以避免冲突）；读 `{{HARNESS_MEMORY_DIR}}/plans/bdd.json` 把失败场景 id 映射到其 feature 的 `fr`。
+  2. 构造 items 数组写入 `.harness/blueprint/tasks/iter-add.json`，每条形如（保持泛化，按实际缺陷填）：
+     ```json
+     [{
+       "id": "<新 id：现有数值 id 的 max+1，或 fix-<场景id>；若同名已存在则换新后缀>",
+       "status": "failing",
+       "category": "bugfix",
+       "title": "修复 <失败场景id>：<一句缺陷摘要>",
+       "description": "<根因 + 定向修复方案 + 复现步骤>",
+       "bdd_ids": ["<失败场景 id>"],
+       "srs_trace": ["<失败场景所属 feature 的 fr — 供 gate_red 强制回归测试；纯 NFR 缺陷可省略>"],
+       "dependencies": ["<受影响的原 task id>"]
+     }]
+     ```
+  3. 增量追加进 loop（不动既有任务）：{{TASKS_ADD loop=iter file=.harness/blueprint/tasks/iter-add.json}}
+  4. 上报失败触发回卷（引擎按 `onFail.rewindTo=iter` 重入 loop 挑中 bugfix-task）：{{ADVANCE_FAIL notes=<已建 bugfix-task 的 id 与其覆盖的场景；回 iter 修复后将重对账>}}
+
+  **C. 无法推进**（环境起不来 / 全量测试根本跑不动等非代码缺陷）→ {{ADVANCE_BLOCKED notes=<原因>}}。
 
 ## 关键规则
 - **证据导向裁决** —— 每个 PASS 必有实测证据；"看着行"不是证据。

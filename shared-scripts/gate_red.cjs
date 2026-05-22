@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // gate_red.cjs —— BDD 覆盖硬门（loop iter 体内，置于 red 之后）
-// 校验：当前特性相关的 BDD 场景（按 FR 交集映射）是否都被 red 产出的、
-//       带场景 id 标记的测试覆盖。这是「BDD 场景 → 测试代码」唯一一道
+// 校验：当前特性相关的 BDD 场景（优先按 task.bdd_ids 指派，回退 FR 交集）是否都被
+//       red 产出的、带场景 id 标记的测试覆盖。这是「BDD 场景 → 测试代码」唯一一道
 //       机检无损门——red 须为每个相关场景写带 id 标记（如 # BDD-001）的失败测试。
 //
 // v10 风格：由 review skill 的 LLM 直接 `node` 运行（无框架 stdin）。
@@ -11,7 +11,9 @@
 // stdout: 最后一行 JSON {pass: bool, message: string}
 // exit:   0 always（LLM 读 stdout 决定 ok/failed/blocked 三态）
 //
-// 映射规则：相关场景 = bdd.json 中 feature.fr ∩ task.srs_trace ≠ ∅ 的 feature 下全部 scenario
+// 映射规则：相关场景 = task.bdd_ids 指派的场景（init 写入的权威指针）；task 无 bdd_ids 时
+//           回退到 bdd.json 中 feature.fr ∩ task.srs_trace ≠ ∅ 的 feature 下全部 scenario。
+//           与 gate_behavior 同口径——避免按 FR 沾边把它任务的场景误纳入本任务。
 // 通过条件：每个相关场景的 id 都能在工作区测试/源码（排除 .harness 等）中以 BDD-\d+ 出现
 // 不运行测试（red 阶段测试本应失败）——仅做覆盖标记静态核对。
 
@@ -99,12 +101,14 @@ function scanWorkspace(root) {
     const srsTrace = Array.isArray(task.srs_trace)
       ? task.srs_trace.filter(isNonEmptyString).map((s) => s.trim())
       : [];
+    const bddIds = Array.isArray(task.bdd_ids)
+      ? task.bdd_ids.filter(isNonEmptyString).map((s) => s.trim().toUpperCase())
+      : [];
 
-    // task 无 srs_trace → 无法映射相关场景，跳过（属 init 职责，非 red 之过）
-    if (srsTrace.length === 0) {
-      emit(true, `task#${tid} 无 srs_trace，无法映射 BDD 场景，跳过覆盖校验`);
+    // task 既无 bdd_ids 也无 srs_trace → 无法映射相关场景，跳过（属 init 职责，非 red 之过）
+    if (bddIds.length === 0 && srsTrace.length === 0) {
+      emit(true, `task#${tid} 既无 bdd_ids 也无 srs_trace，无法映射 BDD 场景，跳过覆盖校验`);
     }
-    const srsSet = new Set(srsTrace);
 
     // ---- bdd.json → 相关场景 id 集 ----
     const bddPath = path.join(cwd, '.harness', 'memory', 'plans', 'bdd.json');
@@ -118,23 +122,44 @@ function scanWorkspace(root) {
       emit(false, 'bdd.json 结构异常（features 非数组），无法映射相关场景');
     }
 
-    const relevant = new Map(); // 大写 id -> 可读标签
+    // 全量索引：大写 id -> { label, frHit }（frHit = feature.fr ∩ task.srs_trace ≠ ∅）
+    const scenarioById = new Map();
     for (const feat of bdd.features) {
-      if (!feat || typeof feat !== 'object' || !Array.isArray(feat.fr)) continue;
-      const hit = feat.fr.some((f) => typeof f === 'string' && srsSet.has(f.trim()));
-      if (!hit) continue;
+      if (!feat || typeof feat !== 'object' || !Array.isArray(feat.scenarios)) continue;
       const fname = isNonEmptyString(feat.feature) ? feat.feature.trim() : '?';
-      if (!Array.isArray(feat.scenarios)) continue;
+      const frHit = Array.isArray(feat.fr)
+        && feat.fr.some((f) => typeof f === 'string' && srsTrace.includes(f.trim()));
       for (const sc of feat.scenarios) {
         if (!sc || typeof sc !== 'object' || !isNonEmptyString(sc.id)) continue;
         const id = sc.id.trim().toUpperCase();
         const label = fname + ' / ' + (isNonEmptyString(sc.scenario) ? sc.scenario.trim() : id);
-        relevant.set(id, label);
+        scenarioById.set(id, { label, frHit });
+      }
+    }
+
+    // 相关场景：优先 task.bdd_ids（init 写入的权威指针），否则兜底 fr ∩ srs_trace。
+    // 与 gate_behavior 同口径，避免按 FR 沾边把它任务的场景误纳入本任务。
+    const relevant = new Map(); // 大写 id -> 可读标签
+    let unknownNote = '';
+    if (bddIds.length) {
+      const unknown = [];
+      for (const id of bddIds) {
+        const meta = scenarioById.get(id);
+        if (meta) relevant.set(id, meta.label);
+        else unknown.push(id);
+      }
+      if (unknown.length) {
+        unknownNote = `\n⚠ task.bdd_ids 含 bdd.json 中不存在的 id：${unknown.join(',')}`
+          + `（init 指派与 bdd 产出不一致，请核对；本门仅按已存在的场景校验覆盖）`;
+      }
+    } else {
+      for (const [id, meta] of scenarioById) {
+        if (meta.frHit) relevant.set(id, meta.label);
       }
     }
 
     if (relevant.size === 0) {
-      emit(true, `task#${tid}（srs_trace=${srsTrace.join(',')}）无映射到的 BDD 场景，覆盖校验通过（空集）`);
+      emit(true, `task#${tid}（bdd_ids=${bddIds.join(',') || '∅'}, srs_trace=${srsTrace.join(',') || '∅'}）无映射到的 BDD 场景，覆盖校验通过（空集）${unknownNote}`);
     }
 
     // ---- 扫描工作区测试/源码 ----
@@ -148,10 +173,10 @@ function scanWorkspace(root) {
       const shown = missing.slice(0, MAX_REPORT);
       const more = missing.length > MAX_REPORT ? `\n…另有 ${missing.length - MAX_REPORT} 个未列出` : '';
       emit(false, `BDD 覆盖不全：task#${tid} 有 ${missing.length}/${relevant.size} 个相关场景未在测试代码中找到 id 标记：\n- ${shown.join('\n- ')}${more}\n`
-        + `（请为每个缺失场景补写一条失败测试并以其 id 打标，如注释 # ${[...relevant.keys()][0]}；srs_trace=${srsTrace.join(',')}）`);
+        + `（请为每个缺失场景补写一条失败测试并以其 id 打标，如注释 # ${[...relevant.keys()][0]}；bdd_ids=${bddIds.join(',') || '∅'}）${unknownNote}`);
     }
 
-    emit(true, `BDD 覆盖校验通过：task#${tid} 的 ${relevant.size} 个相关场景 id 均在测试代码中出现`);
+    emit(true, `BDD 覆盖校验通过：task#${tid} 的 ${relevant.size} 个相关场景 id 均在测试代码中出现${unknownNote}`);
   } catch (e) {
     emit(false, 'gate_red 内部错误（请检查 state.json / bdd.json 可读性）: ' + (e && e.message ? e.message : String(e)));
   }
