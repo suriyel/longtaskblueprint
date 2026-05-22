@@ -3,7 +3,7 @@
   "id": "long-task-flow",
   "version": "1.0.0",
   "title": "Long-Task IPD",
-  "description": "由 D:\\03PyDemo\\longtaskforagent 主链 (codebase-scanner / requirements / design / init / work-design+feature-design / tdd-red / tdd-green / tdd-refactor) 通过 harness-blueprint-adapter 转化产出。schemaVersion=3，含 SRS 与 Design 双硬门、loop 体内 R/G/R 三节点 + gate_static 硬门，所有产物落 .harness/memory/。",
+  "description": "由 D:\\03PyDemo\\longtaskforagent 主链 (codebase-scanner / requirements / design / init / work-design+feature-design / tdd-red / tdd-green / tdd-refactor) 通过 harness-blueprint-adapter 转化产出。schemaVersion=3，含 SRS 与 Design 双硬门、loop 体内 R/G/R 三节点 + gate_red 硬门（机检 red 产出的 UT 按场景 id 无损覆盖当前特性相关的 bdd.json 场景），所有产物落 .harness/memory/。",
   "startNode": "scan",
   "nodes": [
     {
@@ -119,10 +119,23 @@
             "y": 100
           },
           {
+            "id": "gate_red",
+            "kind": "skill",
+            "title": "BDD 覆盖硬门",
+            "x": 500,
+            "y": 100,
+            "onFail": {
+              "rewindTo": "red",
+              "ticketTitle": "UT 漏覆盖 BDD 场景 — 见缺失 id 清单",
+              "maxAttempts": 3,
+              "when": "status != \"ok\""
+            }
+          },
+          {
             "id": "green",
             "kind": "skill",
             "title": "TDD Green",
-            "x": 500,
+            "x": 700,
             "y": 100,
             "onFail": {
               "rewindTo": "red",
@@ -135,7 +148,7 @@
             "id": "refactor",
             "kind": "skill",
             "title": "TDD Refactor",
-            "x": 700,
+            "x": 900,
             "y": 100,
             "onFail": {
               "rewindTo": "green",
@@ -153,8 +166,12 @@
           },
           {
             "from": "red",
-            "to": "green",
+            "to": "gate_red",
             "when": "status == \"ok\""
+          },
+          {
+            "from": "gate_red",
+            "to": "green"
           },
           {
             "from": "green",

@@ -28,11 +28,20 @@ description: "TDD Red 阶段 -- 为功能测试清单编写失败测试。"
 7. 相关现有测试 -- 探索依赖功能的测试文件，获取断言风格、fixtures、导入、mock 模式。
 
 **禁令**：
-- 禁止 Glob / Read / Grep `{{HARNESS_MEMORY_DIR}}/plans/srs.md` 或 `{{HARNESS_MEMORY_DIR}}/plans/design.md`（任何切片方式皆禁）
-- 所有上游约束（SRS FR / Design §11 等）已由 wd 节点沉淀到 feature.md §全局约束摘录；若发现缺失 → 返回 BLOCKED，不自行回访上游
+- 禁止 Glob / Read / Grep `{{HARNESS_MEMORY_DIR}}/plans/srs.md` 或 `{{HARNESS_MEMORY_DIR}}/plans/design.md`（任何切片方式皆禁）；同样**不直读 `bdd.json`**——BDD 行为已由 wd 沉淀进 §测试清单（"追踪到"列带 `BDD-xxx`）
+- 所有上游约束（SRS FR / Design §11 / BDD 场景等）已由 wd 节点沉淀到 feature 设计文档；若发现缺失 → 返回 BLOCKED，不自行回访上游
+
+## BDD 追溯打标（强约束）
+
+§测试清单是 wd **以 bdd.json 为源**构建的：源自 BDD 行为的行，其"追踪到"列带 `BDD-xxx` id。
+
+- 为「"追踪到"含 `BDD-xxx`」的**每一行**写测试时，**必须用该 id 给测试打标**——测试名后缀（如 `test_empty_pw_rejected_BDD001`）或紧邻注释（`# BDD-001` / `// BDD-001`），使「BDD 场景 → 测试代码」追溯链在代码层可见。
+- 覆盖每个带 `BDD-xxx` 的清单行，**一个都不能少**：下游 `gate_red` 硬门 grep 工作区测试文件逐 id 核对，缺任一即打回本节点。
+- **降级护栏**：若被 `gate_red` 打回、其 ticket 指出某 `BDD-xxx` 缺失，但该 id 在 §测试清单 中根本不存在（= wd 漏列该场景）→ 返回 BLOCKED 说明情况（属 wd 层缺口），**不臆造测试**。
 
 ## 关键约束
 
+- **BDD 追溯打标**：§测试清单"追踪到"含 `BDD-xxx` 的行，对应测试必须带该 id 标记——gate_red 据此判定，优先级高于"精简"
 - 先写集成测试，再写单元测试
 - 按 `{{SHARE-REFERENCE}}/iron-law.md` §R1-R9 执行（本文件不重复）
 - 所有测试必须失败（退出码 != 0 为成功）。退出码 0 表示测试有误 — 重写

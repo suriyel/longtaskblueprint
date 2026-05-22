@@ -20,7 +20,7 @@ description: "当 SRS 已产出、设计与任务列表尚未开始时使用 —
 本节点带 `onFail.rewindTo: req`：可能此前已就某些 gap 打回过需求节点、现在是回流重跑。**绝不重复打回同一 gap。**
 
 1. 运行 {{TICKETS_GET}} —— 读取指向本节点的历史打回单（open / closed 皆看）。把每张单的 `message`（曾提出的待澄清项）汇成「**已提出集合**」。
-2. 若 `{{HARNESS_MEMORY_DIR}}/plans/bdd.json` 已存在（上一轮产物，可能是被 `gate_bdd` 打回重跑），Read 它，把 `clarifications[]` 一并并入「已提出集合」，并把已写好的用例作为本轮基线（增量更新，不推倒重写）。**若本轮是被 gate_bdd 因「规范性不达标」打回**（ticket 来自 gate_bdd），重点按其 message 修正 JSON 结构/字段，不重新发起需求侧打回。
+2. 若 `{{HARNESS_MEMORY_DIR}}/plans/bdd.json` 已存在（上一轮产物，可能是被 `gate_bdd` 打回重跑），Read 它，把 `clarifications[]` 一并并入「已提出集合」，并把已写好的用例作为本轮基线（增量更新，不推倒重写）。**已存在场景的 `id` 原样保留、不得重新编号**（下游测试已按 id 打标），仅给本轮新增场景续号。**若本轮是被 gate_bdd 因「规范性不达标」打回**（ticket 来自 gate_bdd），重点按其 message 修正 JSON 结构/字段，不重新发起需求侧打回。
 3. 无任何 ticket 且无旧 bdd.json → 「已提出集合」为空，本轮为首次执行，照常往下。
 
 > 规则：Step 4 完备性推导得到的 gap，凡落在「已提出集合」内的一律视为「需求侧已知 / 处理中」，**不再计入本轮打回**；仅本轮**新发现**且仍未澄清的项才允许打回。
@@ -69,6 +69,7 @@ description: "当 SRS 已产出、设计与任务列表尚未开始时使用 —
       "fr": ["FR-001"],
       "scenarios": [
         {
+          "id": "BDD-001",
           "scenario": "<一个具体、可判定的行为场景名>",
           "given": ["<前置状态 / 已有数据 — 完整到可复现>"],
           "when": ["<触发的单一事件 / 操作>"],
@@ -76,6 +77,7 @@ description: "当 SRS 已产出、设计与任务列表尚未开始时使用 —
           "examples": ["<具体取值：输入 → 预期>", "<另一组：输入 → 预期>"]
         },
         {
+          "id": "BDD-002",
           "scenario": "<跨域组合场景：与存量模块交互>",
           "cross_domain": "<存量符号，形如 模块名 @ src/foo.js:42>",
           "given": ["<存量侧状态>"],
@@ -93,8 +95,10 @@ description: "当 SRS 已产出、设计与任务列表尚未开始时使用 —
 **字段硬规则（gate_bdd 逐条校验，违反即打回 bdd 重出）**：
 - 合法 JSON、顶层对象；`features` 非空数组；`clarifications` 为字符串数组（无缺口则 `[]`）。
 - 每个 feature：`feature` 非空字符串；`fr` 非空数组且每项匹配 `^[A-Z]{2,4}-\d+$`（如 FR-001 / IFR-002 / CON-001）；`scenarios` 非空数组。
-- 每个 scenario：`scenario` 非空字符串；`given` / `when` / `then` / `examples` 均为**非空字符串数组**。
+- 每个 scenario：`id` 非空且匹配 `^BDD-\d+$`、**全局唯一**（跨 feature 也不重号）；`scenario` 非空字符串；`given` / `when` / `then` / `examples` 均为**非空字符串数组**。
 - `cross_domain` 可选；若存在须为非空字符串（形如 `"模块名 @ src/foo.js:42"`）。
+
+> **场景 `id` 是下游追溯锚点**：TDD Red 节点会用该 id 给对应单元测试打标，环内 `gate_red` 硬门据此机检「每个相关场景都有测试覆盖」。故 **id 一旦分配不得变动**——重跑（被 gate_bdd / req 打回）时保留既有场景 id，只给本轮新增场景续号。
 
 ### 3.2 FIRST 原则（适配 BDD 场景质量）
 

@@ -219,8 +219,8 @@ flowchart TD
 
 | ID | 类别 | 追踪到 | 输入/设置 | 预期 | WRONG_IMPL（杀死哪个错误实现？）|
 |----|------|--------|-----------|------|-------------------------------|
-| 1  | FUNC/happy       | FR-xxx AC-1 | [具体值] | [精确结果] | [返回硬编码值；交换两字段；跳过计算] |
-| 2  | FUNC/error       | §接口契约 Raises | [触发条件] | [异常类型 + 消息] | [静默吞掉异常；抛错误类型] |
+| 1  | FUNC/happy       | BDD-001（FR-xxx AC-1）| [场景 given/examples] | [场景 then] | [返回硬编码值；交换两字段；跳过计算] |
+| 2  | FUNC/error       | BDD-002 §接口契约 Raises | [触发条件] | [异常类型 + 消息] | [静默吞掉异常；抛错误类型] |
 | 3  | BNDRY/range      | §接口契约 边界决策 | [边界值] | [精确行为] | [差一错误；含/不含边界混淆] |
 | 4  | BNDRY/existence  | §接口契约 边界决策 | [空/缺失/null] | [精确行为] | [NPE；把空当正常值处理] |
 | 5  | BNDRY/time       | §接口契约 时序约束 | [并发/超时/顺序] | [精确行为] | [竞态未处理；超时未触发] |
@@ -232,6 +232,8 @@ flowchart TD
 - `MAIN=BNDRY` 时 subtag 必取 `{range, existence, time}`（对齐 iron-law R1 CORRECT 最小子集）；`conformance, ordering, reference, cardinality` 为推荐子集
 - 其余 MAIN 的 subtag 为自由标签
 
+> **「追踪到」列**：源自 BDD 行为的行写其 `BDD-xxx` id（必要时并列 FR-AC / 设计章节，如 `BDD-001（FR-002 AC-1）`）；源自设计内部的行（§4.N 接口、UML 分支、集成边界）写设计章节。**bdd.json 中每个相关场景至少对应一行带其 BDD-xxx**——这是 TDD Red 打标与 gate_red 机检的追溯锚点。
+
 > ID 为排序序号，不作为测试函数名前缀。测试函数名从类别+输入列派生描述性名称（如 FUNC/error + "空字符串" → `test_validate_rejects_empty_string`）。
 >
 > **WRONG_IMPL 列**直接供 TDD Red SubAgent 作为测试函数 `# WRONG_IMPL:` 注释内容（iron-law R4）。设计阶段已预分析 → TDD 阶段直接引用，不再二次推导。
@@ -239,6 +241,7 @@ flowchart TD
 ## 验证检查清单
 - [ ] 所有 SRS 验收标准（来自 srs_trace）追踪到接口契约后置条件
 - [ ] 所有 SRS 验收标准（来自 srs_trace）追踪到测试清单行
+- [ ] 每个相关 BDD 场景（bdd.json 中 fr[] ∩ task.srs_trace 的 feature 下 scenario）在测试清单"追踪到"列被至少一行以 BDD-xxx 引用
 - [ ] 边界决策表覆盖所有接口契约参数
 - [ ] 错误处理表覆盖所有 Raises 条目
 - [ ] 实现摘要覆盖项目结构中所有 [new]/[modified] 文件

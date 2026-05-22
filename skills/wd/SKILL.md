@@ -19,6 +19,7 @@ description: "在 TDD 之前产出**当前任务**的功能级详细设计文档
    - SRS：`{{HARNESS_MEMORY_DIR}}/plans/srs.md`
    - 整体设计：`{{HARNESS_MEMORY_DIR}}/plans/design.md`
    - 项目上下文：`{{HARNESS_MEMORY_DIR}}/plans/project-context.md`（init 产出 — tech_stack 与项目级 constraints/assumptions 解析后权威源；tech_stack 沉淀进 feature.md §11.7 时优先于 design.md §11.7）
+   - **BDD 行为用例：`{{HARNESS_MEMORY_DIR}}/plans/bdd.json`**（bdd 节点产出，经 gate_bdd 校验）——筛出 `fr[]` 与当前 `task.srs_trace`（{{TASK_GET}} 取）**有交集**的 feature 下**全部 scenario** = **本特性必测行为**。这是 §测试清单的源与底线（见下）。
 4. 读取代码库约定（如存在）：`{{HARNESS_MEMORY_DIR}}/notes/rules/*.md`
 
 ## 关键约束
@@ -29,6 +30,7 @@ description: "在 TDD 之前产出**当前任务**的功能级详细设计文档
   - `## 全局约束摘录` — §11.1 子集（仅本特性涉及领域）+ §11.5 全表 + §11.6 全段
   - `## 静态分析与质量工具命令` — §11.4 静态分析命令 + §11.7 覆盖率/变异阈值
   - 两章节末尾各带溯源行 `> 摘自 Design §... — commit <sha>，date YYYY-MM-DD`
+- **§测试清单以 BDD 为源与底线**：第 3 步筛出的**每个相关 BDD 场景至少 1 行**，该行「追踪到」列写其 `BDD-xxx` id（可并列 FR-AC / 设计章节）；「输入/设置」取自场景 `given`/`examples`、「预期」取自场景 `then`，再用 §接口契约 边界/Raises 充实成精确值。设计内部测试点（§4.N 命名接口、UML 分支、集成边界）作为**额外行**补充——BDD 提供「测什么」的底线，设计补「怎么测」的深度。**漏掉任一相关场景**下游 `gate_red` 会查出并打回。
 - 测试清单负向测试比例 >= 40%
 - 测试清单类别应根据 SRS 验收标准覆盖 FUNC、BNDRY、SEC
 - §11 合规：命名遵循 §11.5，操作使用 §11.1 库，错误处理遵循 §11.6

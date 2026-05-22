@@ -10,14 +10,15 @@
 //
 // schema（按 feature 分组 + examples 数组）：
 //   { features: [ { feature, fr:[FR-xxx], scenarios: [
-//       { scenario, given:[], when:[], then:[], examples:[], cross_domain? } ] } ],
+//       { id:"BDD-xxx", scenario, given:[], when:[], then:[], examples:[], cross_domain? } ] } ],
 //     clarifications: [ "FR-xxx: ..." ] }
 //
 // 硬校验（违反即 fail → 打回 bdd 重出规范 JSON）：
 //   - 合法 JSON 且顶层为对象
 //   - features 非空数组；clarifications 为字符串数组（存在，可空）
 //   - 每 feature: feature 非空字符串 + fr 非空数组(每项匹配 ^[A-Z]{2,4}-\d+$) + scenarios 非空数组
-//   - 每 scenario: scenario 非空; given/when/then/examples 均为非空字符串数组;
+//   - 每 scenario: id 非空且匹配 ^BDD-\d+$、全局唯一（下游测试追溯锚点）;
+//                  scenario 非空; given/when/then/examples 均为非空字符串数组;
 //                  cross_domain 若存在须为非空字符串
 // 软（仅告警不 fail）：零 cross_domain 场景
 
@@ -25,6 +26,7 @@ const fs = require('fs');
 const path = require('path');
 
 const FR_PATTERN = /^[A-Z]{2,4}-\d+$/;
+const BDD_ID_PATTERN = /^BDD-\d+$/;
 const MAX_REPORT = 25; // 报告的错误条数上限，避免 message 爆长
 
 function emit(pass, message) {
@@ -83,6 +85,7 @@ function isNonEmptyStringArray(v) {
   // ---- 逐 feature / scenario ----
   let scenarioCount = 0;
   let crossDomainCount = 0;
+  const scenarioIds = new Set(); // 跨 feature 全局查重
 
   for (let fi = 0; fi < doc.features.length; fi++) {
     const feat = doc.features[fi];
@@ -116,6 +119,15 @@ function isNonEmptyStringArray(v) {
       }
       scenarioCount++;
       const sname = isNonEmptyString(sc.scenario) ? sc.scenario : '#' + si;
+
+      // id：非空 + 模式 + 全局唯一（下游 red 打标 / gate_red 机检的追溯锚点）
+      if (!isNonEmptyString(sc.id) || !BDD_ID_PATTERN.test(sc.id.trim())) {
+        errors.push(sp + ' (' + sname + '): 缺合法 id（须为非空字符串且匹配 ^BDD-\\d+$，如 BDD-001）');
+      } else {
+        const sid = sc.id.trim();
+        if (scenarioIds.has(sid)) errors.push(sp + ' (' + sname + '): id "' + sid + '" 重复（须全局唯一）');
+        scenarioIds.add(sid);
+      }
 
       if (!isNonEmptyString(sc.scenario)) errors.push(sp + ': 缺非空 scenario（场景名）');
 
