@@ -203,8 +203,8 @@
     {
       "id": "st",
       "title": "系统测试 + BDD 对账",
-      "x": 2100,
-      "y": 100,
+      "x": 2984,
+      "y": 426,
       "onFail": {
         "rewindTo": "iter",
         "ticketTitle": "ST 发现真实缺陷 — 已建 bugfix-task，回 iter 修复后重对账",
@@ -215,8 +215,8 @@
     {
       "id": "gate_st",
       "title": "ST BDD 对账硬门",
-      "x": 2300,
-      "y": 100,
+      "x": 2525,
+      "y": 497,
       "onFail": {
         "rewindTo": "st",
         "ticketTitle": "ST BDD 对账未通过 — 见未对账/FAIL 的场景清单",
