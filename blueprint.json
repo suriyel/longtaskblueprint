@@ -3,7 +3,7 @@
   "id": "long-task-flow",
   "version": "1.0.0",
   "title": "Long-Task IPD",
-  "description": "由 D:\\03PyDemo\\longtaskforagent 主链 (codebase-scanner / requirements / design / init / work-design+feature-design / tdd-red / tdd-green / tdd-refactor) 通过 harness-blueprint-adapter 转化产出。schemaVersion=3，含 SRS 与 Design 双硬门、loop 体内 R/G/R 三节点 + gate_red 硬门（机检 red 产出的 UT 按场景 id 无损覆盖当前特性相关的 bdd.json 场景），所有产物落 .harness/memory/。",
+  "description": "由 D:\\03PyDemo\\longtaskforagent 主链 (codebase-scanner / requirements / design / init / work-design+feature-design / tdd-red / tdd-green / tdd-refactor) 通过 harness-blueprint-adapter 转化产出。schemaVersion=3，含 SRS 与 Design 双硬门；init 给每个 task 写 bdd_ids[] 权威指针（gate_init 机检 BDD 全覆盖）；loop 体内 R/G/R 三节点 + gate_red（机检 UT 按场景 id 无损覆盖）+ gate_behavior（refactor 后真跑测试核验每个相关 BDD 场景 then 被精确断言、可观察面未被 mock）；iter 后 st 系统测试 + gate_st（真实环境逐条 replay bdd.json 场景的 BDD 对账硬门）。所有产物落 .harness/memory/。",
   "startNode": "scan",
   "nodes": [
     {
@@ -156,6 +156,19 @@
               "maxAttempts": 2,
               "when": "status != \"ok\""
             }
+          },
+          {
+            "id": "gate_behavior",
+            "kind": "skill",
+            "title": "BDD 行为门",
+            "x": 1100,
+            "y": 100,
+            "onFail": {
+              "rewindTo": "red",
+              "ticketTitle": "BDD then 未被真实精确断言 / 可观察面被 mock — 见缺口清单",
+              "maxAttempts": 3,
+              "when": "status != \"ok\""
+            }
           }
         ],
         "edges": [
@@ -177,10 +190,33 @@
             "from": "green",
             "to": "refactor",
             "when": "status == \"ok\""
+          },
+          {
+            "from": "refactor",
+            "to": "gate_behavior",
+            "when": "status == \"ok\""
           }
         ]
       },
       "maxIterations": 50
+    },
+    {
+      "id": "st",
+      "title": "系统测试 + BDD 对账",
+      "x": 2100,
+      "y": 100
+    },
+    {
+      "id": "gate_st",
+      "title": "ST BDD 对账硬门",
+      "x": 2300,
+      "y": 100,
+      "onFail": {
+        "rewindTo": "st",
+        "ticketTitle": "ST BDD 对账未通过 — 见未对账/FAIL 的场景清单",
+        "maxAttempts": 2,
+        "when": "status != \"ok\""
+      }
     }
   ],
   "edges": [
@@ -224,6 +260,15 @@
     {
       "from": "gate_init",
       "to": "iter"
+    },
+    {
+      "from": "iter",
+      "to": "st"
+    },
+    {
+      "from": "st",
+      "to": "gate_st",
+      "when": "status == \"ok\""
     }
   ],
   "tasksSchemas": {
@@ -266,6 +311,12 @@
         "srs_trace": {
           "type": "array"
         },
+        "bdd_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "verification_steps": {
           "type": "array"
         },
@@ -290,6 +341,10 @@
         "srs_trace": [
           "FR-001",
           "FR-003"
+        ],
+        "bdd_ids": [
+          "BDD-001",
+          "BDD-007"
         ],
         "dependencies": [],
         "verification_steps": [

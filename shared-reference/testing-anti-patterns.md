@@ -248,6 +248,57 @@ TDD cycle:
 4. THEN claim complete
 ```
 
+## Anti-Pattern 6: Mocking the BDD Observable Surface（用 mock 替换 BDD 可观察面）
+
+> Language-agnostic principle; mock syntax below varies by ecosystem (`vi.mock`/`jest.mock`/`unittest.mock.patch`/`Mockito.mock`/…). The example uses one stack only to illustrate.
+
+A BDD scenario's `then` describes an **observable result** (a returned value, a rendered/output message, a status code, a persisted record, an emitted event). When the test mocks the very module that produces that result and asserts only that it *was called*, the result itself is never checked.
+
+**The violation:**
+```
+// BDD-NNN then: confirmation message equals "<exact expected text>"
+// ❌ BAD: the module that produces the message is fully mocked,
+//         and the test asserts only the call — never the text.
+mock(module_producing_message)              // whole surface replaced by a stub
+
+test "BDD-NNN shows confirmation":
+    submit()
+    assert produce_message.was_called()      // proves the call, NOT the `then`
+// Result: impl returns the WRONG text → test still green, gate still passes.
+```
+
+**Why this is wrong:**
+- The `then` is about the produced value; once its producing surface is mocked, the real value is never asserted
+- A "was-called" assertion proves a call happened, not that the output is correct — its coverage of the `then` is **empty**
+- token present (a `BDD-NNN` tag satisfies `gate_red`'s static grep) + tests green (satisfies green) → the behavior can deviate with nothing catching it
+
+**The Iron Rule:** the surface that produces a BDD scenario's `then` observable result **must not be mocked**; that row's assertion must check the **exact** `then`/`examples` value. Mock only at outer real boundaries (network/3rd-party/clock/filesystem).
+
+**The fix:**
+```
+// ✅ GOOD: don't mock the observable surface; assert the exact value
+//          (provide a real environment for it if needed — real DOM, real I/O sink, etc.)
+test "BDD-NNN shows confirmation":
+    submit()                                 // real producing code runs
+    assert produced_message == "<exact expected text>"   // exact `then` value
+```
+
+### Gate Function
+
+```
+BEFORE mocking a module referenced by a BDD-NNN test row:
+  Ask: "Does this module produce the observable result the BDD `then` describes?"
+
+  IF yes (it's the surface the assertion reads):
+    STOP - Do NOT mock it. Use the real implementation; assert the exact then/examples value.
+    Mock only outer real boundaries (network/3rd-party/clock/filesystem) if needed.
+
+  Ask: "Is my only assertion a 'was-called' check for this BDD row?"
+
+  IF yes:
+    STOP - A call-assertion does not cover a `then`. Assert the exact observable value.
+```
+
 ## When Mocks Become Too Complex
 
 **Warning signs:**
@@ -280,6 +331,8 @@ TDD cycle:
 | Incomplete mocks | Mirror real API completely |
 | Tests as afterthought | TDD - tests first |
 | Over-complex mocks | Consider integration tests |
+| Mock the BDD observable surface | Don't mock it; assert the exact `then` value |
+| "was-called" assertion as `then` coverage | Assert the exact observable value, not just the call |
 
 ## Red Flags
 

@@ -18,6 +18,7 @@ const path = require('path');
 // ---- 常量（照搬 validate_features.py:32-37）---------------------------------
 const REQUIRED_FIELDS = ['id', 'category', 'title', 'description', 'priority', 'status'];
 const SRS_TRACE_PATTERN = /^(?:FR|IFR)-\d{3}$/;
+const BDD_ID_PATTERN = /^BDD-\d+$/;
 const VALID_STATUSES = new Set(['failing', 'passing']);
 const VALID_PRIORITIES = new Set(['high', 'medium', 'low']);
 const VALID_LANGUAGES = new Set(['python', 'java', 'javascript', 'typescript', 'c', 'cpp', 'c++', 'todo']);
@@ -85,6 +86,20 @@ function validateTasksArray(tasks, loopId) {
       }
     }
 
+    // bdd_ids（L3 BDD 指针）—— 若提供须为 BDD-\d+ 字符串数组
+    if (feat.bdd_ids !== undefined && feat.bdd_ids !== null) {
+      if (!Array.isArray(feat.bdd_ids)) {
+        errors.push(prefix + ' (id=' + fid + '): bdd_ids 必须是数组');
+      } else {
+        for (let bi = 0; bi < feat.bdd_ids.length; bi++) {
+          const b = feat.bdd_ids[bi];
+          if (typeof b !== 'string' || !BDD_ID_PATTERN.test(b)) {
+            errors.push(prefix + ' (id=' + fid + '): bdd_ids[' + bi + '] 应匹配 BDD-\\d+，当前 "' + b + '"');
+          }
+        }
+      }
+    }
+
     // verification_steps
     if (feat.verification_steps !== undefined && feat.verification_steps !== null) {
       if (!Array.isArray(feat.verification_steps) || feat.verification_steps.length === 0) {
@@ -115,6 +130,63 @@ function validateTasksArray(tasks, loopId) {
     }
   }
 
+  return errors;
+}
+
+// ---- A2. BDD 全覆盖校验（task.bdd_ids 并集须无损覆盖 bdd.json 全部场景）---------
+// 防「BDD 场景在拆解时丢失」——init Step 4d 的 bdd_ids 必须把每条场景认领到某个 task，
+// 否则该场景的 then 永远不会进 wd §测试清单 / red 测试 / gate_behavior 核验。
+function validateBddCoverage(tasks, cwd) {
+  const bddPath = path.join(cwd, '.harness', 'memory', 'plans', 'bdd.json');
+  if (!fs.existsSync(bddPath)) {
+    return ['bdd.json 缺失: ' + path.relative(cwd, bddPath) + '（应由上游 bdd 节点产出，无法做 BDD 全覆盖校验）'];
+  }
+  let bdd;
+  try { bdd = JSON.parse(fs.readFileSync(bddPath, 'utf8')); }
+  catch (e) { return ['bdd.json 不是合法 JSON: ' + e.message]; }
+  if (!bdd || typeof bdd !== 'object' || !Array.isArray(bdd.features)) {
+    return ['bdd.json 结构异常（features 非数组），无法做 BDD 全覆盖校验'];
+  }
+
+  // bdd.json 全部场景 id 全集
+  const allScenarioIds = new Set();
+  for (const feat of bdd.features) {
+    if (!feat || typeof feat !== 'object' || !Array.isArray(feat.scenarios)) continue;
+    for (const sc of feat.scenarios) {
+      if (sc && typeof sc === 'object' && typeof sc.id === 'string' && sc.id.trim()) {
+        allScenarioIds.add(sc.id.trim().toUpperCase());
+      }
+    }
+  }
+  if (allScenarioIds.size === 0) return []; // bdd.json 无场景 → 不约束（异常应由 gate_bdd 拦下）
+
+  // 所有 task 的 bdd_ids 并集
+  const claimed = new Set();
+  if (Array.isArray(tasks)) {
+    for (const feat of tasks) {
+      if (!feat || typeof feat !== 'object' || !Array.isArray(feat.bdd_ids)) continue;
+      for (const b of feat.bdd_ids) {
+        if (typeof b === 'string' && b.trim()) claimed.add(b.trim().toUpperCase());
+      }
+    }
+  }
+
+  const errors = [];
+  // 1) 每个场景 id 至少被一个 task 认领（无孤立 BDD 场景）
+  const orphan = [];
+  for (const id of allScenarioIds) if (!claimed.has(id)) orphan.push(id);
+  if (orphan.length) {
+    orphan.sort();
+    errors.push('BDD 场景未被任何 task 的 bdd_ids 认领（' + orphan.length + '/' + allScenarioIds.size
+      + '）：' + orphan.join(', ') + '（请在 init Step 4d 为相关 task 补全 bdd_ids）');
+  }
+  // 2) 每个 bdd_ids 项在 bdd.json 中真实存在（防笔误/陈旧 id）
+  const ghost = [];
+  for (const id of claimed) if (!allScenarioIds.has(id)) ghost.push(id);
+  if (ghost.length) {
+    ghost.sort();
+    errors.push('task.bdd_ids 含 bdd.json 中不存在的场景 id：' + ghost.join(', '));
+  }
   return errors;
 }
 
@@ -173,25 +245,31 @@ function validateContextMd(filePath) {
   const loops = state.loops || {};
   const loopEntries = Object.entries(loops);
   let tasksErrors = [];
+  let tasksArr = [];
   if (loopEntries.length === 0) {
     tasksErrors = ['未检测到已灌入的 tasks（loops 为空）；请确认 init 节点已调用 bp-tasks set'];
   } else {
     // 取第一个有 tasks 的 loop（正常情况下仅一个）
     const [loopId, loopData] = loopEntries[0];
-    tasksErrors = validateTasksArray(loopData.tasks || [], loopId);
+    tasksArr = loopData.tasks || [];
+    tasksErrors = validateTasksArray(tasksArr, loopId);
   }
+
+  // BDD 全覆盖校验 — 仅在有 tasks 时执行（loops 为空已由 tasksErrors 提示）
+  const bddCovErrors = loopEntries.length === 0 ? [] : validateBddCoverage(tasksArr, cwd);
 
   // project-context.md 校验 — 仍为磁盘文件
   const memoryDir = path.join(cwd, '.harness', 'memory', 'plans');
   const ctxPath = path.join(memoryDir, 'project-context.md');
   const ctxErrors = validateContextMd(ctxPath);
 
-  if (tasksErrors.length === 0 && ctxErrors.length === 0) {
-    emit(true, 'Init 校验通过：tasks（via loops）+ project-context.md 均合格');
+  if (tasksErrors.length === 0 && bddCovErrors.length === 0 && ctxErrors.length === 0) {
+    emit(true, 'Init 校验通过：tasks（via loops）+ BDD 全覆盖 + project-context.md 均合格');
   }
 
   const parts = [];
   if (tasksErrors.length) parts.push('tasks: ' + tasksErrors.join('；'));
+  if (bddCovErrors.length) parts.push('BDD 覆盖: ' + bddCovErrors.join('；'));
   if (ctxErrors.length) parts.push('project-context.md: ' + ctxErrors.join('；'));
   emit(false, parts.join(' | '));
 })();
