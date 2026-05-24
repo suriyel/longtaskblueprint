@@ -85,7 +85,7 @@ Read `{{HARNESS_MEMORY_DIR}}/plans/bdd.json`，对**每一条** scenario，在**
 
 ### 9. Verdict + 收尾
 - 按出口标准（回归全绿 / 每边界真实集成 / 全部 BDD 场景对账 PASS / 无未关闭 Critical/Major / RTM 100%）给 Go / Conditional-Go / No-Go，写入报告。
-- **收尾按三态分流**：
+- **收尾按三态分流**（status 纪律：`failed` 必须先 seed bugfix-task 再报、否则回卷到空 iter 是死路；`blocked` → halt 交人工、不回卷；二者不可混）：
 
   **A. Go / Conditional-Go**（`st-acceptance.json` 齐全、无未关闭 Critical/Major）→ {{ADVANCE_OK artifact={{HARNESS_MEMORY_DIR}}/plans/st-acceptance.json}}（进入 `gate_st` 对账硬门）。
 

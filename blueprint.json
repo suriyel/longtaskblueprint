@@ -209,7 +209,7 @@
         "rewindTo": "iter",
         "ticketTitle": "ST 发现真实缺陷 — 已建 bugfix-task，回 iter 修复后重对账",
         "maxAttempts": 3,
-        "when": "status != \"ok\""
+        "when": "status == \"failed\""
       }
     },
     {
